@@ -14,12 +14,24 @@ import Message from "primevue/message";
 import IftaLabel from "primevue/iftalabel";
 import { FloatLabel } from "primevue";
 import { Form } from "@primevue/forms";
+import Dialog from "primevue/dialog";
 
 import "./index.css";
 
-axios.defaults.baseURL = "http://localhost:8080";
+export const api = axios.create({
+  baseURL: import.meta?.env?.BACKEND_URL || "http://localhost:8080",
+});
 
-axios.interceptors.response.use(
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  const isAuthRoute = config.url?.startsWith("/auth/");
+  if (token && !isAuthRoute) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
@@ -48,5 +60,6 @@ app.component("InputText", InputText);
 app.component("IftaLabel", IftaLabel);
 app.component("FloatLabel", FloatLabel);
 app.component("Form", Form);
+app.component("Dialog", Dialog);
 
 app.mount("#app");

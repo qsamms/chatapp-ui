@@ -5,7 +5,7 @@
         <div class="pb-2 text-xl font-semibold text-center">Signup</div>
       </template>
       <template #content>
-        <Form @submit="signup" class="flex flex-col gap-4">
+        <Form @submit="onClickSignup" class="flex flex-col gap-4">
           <div class="flex flex-col">
             <label class="text-left">Email</label>
             <InputText v-model="email" required />
@@ -46,8 +46,8 @@
 
 <script setup>
 import { ref } from "vue";
-import axios from "axios";
 import router from "../router";
+import { signup } from "@/utils/api";
 
 const email = ref("");
 const username = ref("");
@@ -55,7 +55,7 @@ const password1 = ref("");
 const password2 = ref("");
 const error = ref("");
 
-async function signup() {
+async function onClickSignup() {
   if (!username.value || !password1.value || !email.value || !password2.value) {
     error.value = "All fields are required.";
     return;
@@ -65,11 +65,7 @@ async function signup() {
     return;
   }
   try {
-    await axios.post("/auth/signup/", {
-      email: email.value,
-      username: username.value,
-      password: password1.value,
-    });
+    await signup(email.value, username.value, password1.value);
     router.push("/login");
   } catch (err) {
     if (err.response.data.errors) {

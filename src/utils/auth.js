@@ -1,5 +1,5 @@
-import axios from "axios";
 import router from "../router";
+import { getCurrentUser } from "../utils/api";
 
 export function logout() {
   localStorage.removeItem("token");
@@ -7,39 +7,17 @@ export function logout() {
 }
 
 export async function isTokenValid() {
-  const token = localStorage.getItem("token");
-  if (!token) return false;
-
   try {
-    const response = await axios.get("/user/me/", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return !!response.data;
+    return (await getCurrentUser()).status == 200;
   } catch (err) {
-    if (err.response?.status === 401) {
-      return false;
-    }
-    throw err;
+    return false;
   }
 }
 
-export async function getCurrentUserUsername() {
-  const token = localStorage.getItem("token");
-  if (!token) return false;
-
+export async function getCurrentUserObj() {
   try {
-    const response = await axios.get("/user/me/", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return !!response.data.username;
+    return await getCurrentUser();
   } catch (err) {
-    if (err.response?.status === 401) {
-      return false;
-    }
-    throw err;
+    return "";
   }
 }

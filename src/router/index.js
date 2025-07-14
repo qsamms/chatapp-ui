@@ -19,10 +19,8 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.meta.requiresAuth;
   const token = localStorage.getItem("token");
-
   try {
     const valid = await isTokenValid(token);
-
     if (requiresAuth && !valid) {
       next("/login");
     } else if ((to.path === "/login" || to.path === "/signup") && valid) {

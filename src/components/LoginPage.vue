@@ -5,7 +5,7 @@
         <div class="pb-2 text-xl font-semibold text-center">Login</div>
       </template>
       <template #content>
-        <Form @submit="login" class="flex flex-col gap-4">
+        <Form @submit="onClickLogin" class="flex flex-col gap-4">
           <div class="flex flex-col">
             <label for="Username" class="text-left">Username</label>
             <InputText id="username" v-model="username" />
@@ -26,26 +26,24 @@
 
 <script setup>
 import { ref } from "vue";
-import axios from "axios";
 import router from "../router";
+import { login } from "@/utils/api";
 
 const username = ref("");
 const password = ref("");
 const error = ref("");
 
-async function login() {
+async function onClickLogin() {
   if (!username.value || !password.value) {
     error.value = "Username and password are required.";
     return;
   }
   try {
-    const response = await axios.post("/auth/login/", {
-      username: username.value,
-      password: password.value,
-    });
+    const response = await login(username.value, password.value);
     localStorage.setItem("token", response.data.token);
     router.push("/chat");
   } catch (err) {
+    console.log(err);
     error.value = "Login failed";
   }
 }
