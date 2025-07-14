@@ -2,11 +2,13 @@ import { createRouter, createWebHistory } from "vue-router";
 import LoginPage from "../components/LoginPage.vue";
 import SignupPage from "../components/SignupPage.vue";
 import ChatPage from "../components/ChatPage.vue";
+import ProfilePage from "../components/ProfilePage.vue";
 import { isTokenValid } from "../utils/auth";
 
 const routes = [
   { path: "/login", component: LoginPage },
   { path: "/signup", component: SignupPage },
+  { path: "/profile", component: ProfilePage, meta: { requiresAuth: true } },
   { path: "/chat", component: ChatPage, meta: { requiresAuth: true } },
   { path: "/", redirect: "/chat" },
 ];

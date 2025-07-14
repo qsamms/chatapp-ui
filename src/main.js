@@ -15,6 +15,8 @@ import IftaLabel from "primevue/iftalabel";
 import { FloatLabel } from "primevue";
 import { Form } from "@primevue/forms";
 import Dialog from "primevue/dialog";
+import { User } from "lucide-vue-next";
+import { MessageSquarePlus } from "lucide-vue-next";
 
 import "./index.css";
 
@@ -61,5 +63,7 @@ app.component("IftaLabel", IftaLabel);
 app.component("FloatLabel", FloatLabel);
 app.component("Form", Form);
 app.component("Dialog", Dialog);
+app.component("UserIcon", User);
+app.component("AddChatRoom", MessageSquarePlus);
 
 app.mount("#app");

@@ -1,57 +1,82 @@
 <template>
-  <div class="flex h-screen">
+  <div class="flex min-h-screen">
     <!-- Sidebar -->
-    <aside class="w-60 border-r border-gray-300 overflow-y-auto p-4">
-      <h3 class="text-lg font-semibold mb-4">Your Rooms</h3>
+    <aside
+      class="w-60 border-r border-gray-300 overflow-y-auto p-4 flex flex-col justify-between"
+    >
+      <div>
+        <div v-if="loadingRooms" class="text-sm text-gray-600">
+          Loading rooms...
+        </div>
+        <div v-if="error" class="text-sm text-red-500">{{ error }}</div>
 
-      <button
-        @click="createRoomDialogOpen = true"
-        class="mb-4 px-4 py-2 text-white rounded bg-blue-600 hover:bg-blue-700"
-      >
-        Create new room
-      </button>
+        <div v-if="acceptedChatRooms.length" class="text-sm text-gray-600">
+          <div class="flex justify-between">
+            <span>Your rooms</span>
+            <AddChatRoom
+              @click="createRoomDialogOpen = true"
+              class="cursor-pointer hover:opacity-80"
+            ></AddChatRoom>
+          </div>
+        </div>
+        <table
+          v-if="acceptedChatRooms.length"
+          class="w-full border-separate mb-4"
+        >
+          <tbody>
+            <tr
+              v-for="room in acceptedChatRooms"
+              :key="room.id"
+              :class="[
+                'cursor-pointer',
+                selectedRoom?.id === room.id
+                  ? 'bg-blue-100'
+                  : 'hover:bg-gray-100',
+              ]"
+              @click="selectRoom(room)"
+            >
+              <td class="p-2 border-b border-gray-200">{{ room.name }}</td>
+            </tr>
+          </tbody>
+        </table>
 
-      <div v-if="loadingRooms" class="text-sm text-gray-600">
-        Loading rooms...
+        <div v-if="invitedChatRooms.length" class="text-sm text-gray-600">
+          Invited Rooms
+        </div>
+        <table v-if="invitedChatRooms.length" class="w-full border-separate">
+          <tbody>
+            <tr
+              v-for="room in invitedChatRooms"
+              :key="room.id"
+              :class="[
+                'cursor-pointer',
+                selectedRoom?.id === room.id
+                  ? 'bg-blue-100'
+                  : 'hover:bg-gray-100',
+              ]"
+              @click="selectRoom(room)"
+            >
+              <td class="p-2 border-b border-gray-200">{{ room.name }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <div v-if="error" class="text-sm text-red-500">{{ error }}</div>
 
-      <table v-if="chatRooms.length" class="w-full border-separate">
-        <tbody>
-          <tr
-            v-for="room in chatRooms"
-            :key="room.id"
-            :class="[
-              'cursor-pointer',
-              selectedRoom?.id === room.id
-                ? 'bg-blue-100'
-                : 'hover:bg-gray-100',
-            ]"
-            @click="selectRoom(room)"
-          >
-            <td class="p-2 border-b border-gray-200">
-              {{ room.name }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div v-else-if="!loadingRooms" class="text-sm text-gray-500">
-        No chat rooms found.
+      <!-- Profile Button -->
+      <div class="mt-6 pt-4 border-t border-gray-200">
+        <button
+          @click="goToProfile"
+          class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded"
+        >
+          <UserIcon />
+        </button>
       </div>
-
-      <button
-        @click="logout"
-        class="mb-4 px-4 py-2 text-white rounded bg-red-600 hover:bg-red-700"
-      >
-        Logout
-      </button>
     </aside>
 
     <Dialog
       v-model:visible="createRoomDialogOpen"
       model
-      header="Create New Chat Room"
+      header="Create Room"
       position="topleft"
     >
       <div class="flex flex-col gap-4">
@@ -126,28 +151,37 @@
 
 <script setup>
 import { ref, onMounted, watch, nextTick } from "vue";
-import { getCurrentUserObj, logout as logoutUtil } from "@/utils/auth";
+import { getCurrentUserObj } from "@/utils/auth";
 import { InputText } from "primevue";
+import router from "../router";
 import { getChatRooms, getMessages, createChatRoom } from "@/utils/api";
 
-const chatRooms = ref([]);
-const selectedRoom = ref(null);
-const messages = ref([]);
-const loadingRooms = ref(false);
-const loadingMessages = ref(false);
-const error = ref("");
 const currentUser = ref("");
-const createRoomDialogOpen = ref(false);
-const newRoomName = ref("");
-const hasMoreMessages = ref(true);
+
+const loadingRooms = ref(false);
+const acceptedChatRooms = ref([]);
+const invitedChatRooms = ref([]);
+const selectedRoom = ref(null);
 
 const messagesContainer = ref(null);
+const loadingMessages = ref(false);
+const messages = ref([]);
+const error = ref("");
+const hasMoreMessages = ref(true);
+
+const createRoomDialogOpen = ref(false);
+const newRoomName = ref("");
+
+function goToProfile() {
+  router.push("/profile");
+}
 
 async function fetchChatRooms() {
   loadingRooms.value = true;
   try {
     const res = await getChatRooms();
-    chatRooms.value = res.data.accepted;
+    acceptedChatRooms.value = res.data.accepted;
+    invitedChatRooms.value = res.data.invited;
   } catch (e) {
     error.value = "Failed to load chat rooms";
   } finally {
@@ -195,10 +229,6 @@ async function createRoom(name) {
   } catch (e) {
     console.log("Failed to create room");
   }
-}
-
-function logout() {
-  logoutUtil();
 }
 
 function onScroll() {
