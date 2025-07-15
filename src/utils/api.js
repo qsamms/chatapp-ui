@@ -24,3 +24,7 @@ export async function getMessages(chatRoomId, before) {
 export async function createChatRoom(name) {
   return await api.post("/rooms/", { name });
 }
+
+export async function getFriends() {
+  return await api.get("/friendships/accepted/");
+}

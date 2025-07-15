@@ -17,7 +17,11 @@ import { Form } from "@primevue/forms";
 import Dialog from "primevue/dialog";
 import { User } from "lucide-vue-next";
 import { MessageSquarePlus } from "lucide-vue-next";
-
+import { MailPlus } from "lucide-vue-next";
+import NavBar from "./components/NavBar.vue";
+import { ArrowLeft } from "lucide-vue-next";
+import { ArrowRight } from "lucide-vue-next";
+import { MessageSquareText } from "lucide-vue-next";
 import "./index.css";
 
 export const api = axios.create({
@@ -65,5 +69,10 @@ app.component("Form", Form);
 app.component("Dialog", Dialog);
 app.component("UserIcon", User);
 app.component("AddChatRoom", MessageSquarePlus);
+app.component("MailPlus", MailPlus);
+app.component("NavBar", NavBar);
+app.component("ArrowLeft", ArrowLeft);
+app.component("ArrowRight", ArrowRight);
+app.component("MessageSquareText", MessageSquareText);
 
 app.mount("#app");

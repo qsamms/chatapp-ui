@@ -1,5 +1,6 @@
 <template>
   <div class="flex min-h-screen">
+    <NavBar :items="navItems" @navigate="onClickNavigate"></NavBar>
     <!-- Sidebar -->
     <aside
       class="w-60 border-r border-gray-300 overflow-y-auto p-4 flex flex-col justify-between"
@@ -35,7 +36,14 @@
               ]"
               @click="selectRoom(room)"
             >
-              <td class="p-2 border-b border-gray-200">{{ room.name }}</td>
+              <td class="p-2 border-b border-gray-200">
+                {{ room.name }}
+              </td>
+              <td class="p-2 border-b border-gray-200 text-right">
+                <button @click.stop="handleClickInvite(room)">
+                  <MailPlus />
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -61,16 +69,6 @@
           </tbody>
         </table>
       </div>
-
-      <!-- Profile Button -->
-      <div class="mt-6 pt-4 border-t border-gray-200">
-        <button
-          @click="goToProfile"
-          class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded"
-        >
-          <UserIcon />
-        </button>
-      </div>
     </aside>
 
     <Dialog
@@ -86,6 +84,13 @@
         </div>
         <Button @click="() => createRoom(newRoomName)">Create</Button>
       </div>
+    </Dialog>
+
+    <Dialog
+      v-model:visible="inviteFriendsDialogOpen"
+      model
+      header="Invite Friends"
+    >
     </Dialog>
 
     <!-- Main Chat Area -->
@@ -154,7 +159,14 @@ import { ref, onMounted, watch, nextTick } from "vue";
 import { getCurrentUserObj } from "@/utils/auth";
 import { InputText } from "primevue";
 import router from "../router";
-import { getChatRooms, getMessages, createChatRoom } from "@/utils/api";
+import {
+  getChatRooms,
+  getMessages,
+  createChatRoom,
+  getFriends,
+} from "@/utils/api";
+import { navItems, onClickNavigate } from "../router";
+import NavBar from "./NavBar.vue";
 
 const currentUser = ref("");
 
@@ -172,8 +184,12 @@ const hasMoreMessages = ref(true);
 const createRoomDialogOpen = ref(false);
 const newRoomName = ref("");
 
-function goToProfile() {
-  router.push("/profile");
+const inviteFriendsDialogOpen = ref(false);
+const currentUserFriends = ref([]);
+
+async function handleClickInvite() {
+  currentUserFriends.value = (await getFriends()).data;
+  inviteFriendsDialogOpen.value = true;
 }
 
 async function fetchChatRooms() {

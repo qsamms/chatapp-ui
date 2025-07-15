@@ -1,13 +1,9 @@
 <template>
-  <div class="flex justify-center items-center">
-    <Card class="w-1/2 max-w-lg shadow-2xl">
-      <template #title>
-        <div class="pb-2 text-xl font-semibold text-center">Profile</div>
-      </template>
-      <template #content>
-        <Button @click="() => logout()">Logout</Button>
-      </template>
-    </Card>
+  <div class="flex">
+    <NavBar :items="navItems" @navigate="onClickNavigate"></NavBar>
+    <div class="flex-1 justify-center items-center mt-8">
+      <Button @click="() => logout()">Logout</Button>
+    </div>
   </div>
 </template>
 
@@ -15,6 +11,7 @@
 import { onMounted, ref } from "vue";
 import { getCurrentUserObj } from "@/utils/auth";
 import { logout } from "@/utils/auth";
+import { onClickNavigate, navItems } from "../router/index";
 
 const user = ref({});
 
