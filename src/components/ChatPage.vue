@@ -1,9 +1,7 @@
 <template>
   <div class="flex min-h-screen">
-    <NavBar :items="navItems" @navigate="onClickNavigate"></NavBar>
-    <!-- Sidebar -->
     <aside
-      class="w-60 border-r border-gray-300 overflow-y-auto p-4 flex flex-col justify-between"
+      class="w-80 border-r border-gray-800 overflow-y-auto p-2 flex flex-col justify-between"
     >
       <div>
         <div v-if="loadingRooms" class="text-sm text-gray-600">
@@ -11,60 +9,63 @@
         </div>
         <div v-if="error" class="text-sm text-red-500">{{ error }}</div>
 
-        <div v-if="acceptedChatRooms.length" class="text-sm text-gray-600">
-          <div class="flex justify-between">
-            <span>Your rooms</span>
-            <AddChatRoom
-              @click="createRoomDialogOpen = true"
-              class="cursor-pointer hover:opacity-80"
-            ></AddChatRoom>
+        <div
+          v-if="acceptedChatRooms.length"
+          class="text-sm text-gray-600 border-gray-800 border-b-2 pb-4 pt-4"
+        >
+          <div class="flex justify-between items-center">
+            <div class="flex text-lg">
+              <div class="pr-2">
+                <MessageCircle></MessageCircle>
+              </div>
+              Chats
+            </div>
           </div>
         </div>
+
+        <div class="flex justify-between text-lg text-gray-600 pt-4">
+          <span>Channels</span
+          ><Plus
+            @click="createRoomDialogOpen = true"
+            class="cursor-pointer hover:opacity-80"
+          ></Plus>
+        </div>
+
         <table
           v-if="acceptedChatRooms.length"
-          class="w-full border-separate mb-4"
+          class="w-full mb-4 mt-2"
+          style="border-collapse: separate; border-spacing: 0 0.5rem"
         >
           <tbody>
             <tr
               v-for="room in acceptedChatRooms"
               :key="room.id"
-              :class="[
-                'cursor-pointer',
-                selectedRoom?.id === room.id
-                  ? 'bg-blue-100'
-                  : 'hover:bg-gray-100',
-              ]"
+              class="group"
               @click="selectRoom(room)"
             >
-              <td class="p-2 border-b border-gray-200">
-                {{ room.name }}
-              </td>
-              <td class="p-2 border-b border-gray-200 text-right">
-                <button @click.stop="handleClickInvite(room)">
-                  <MailPlus />
+              <td
+                :class="[
+                  'p-2 flex justify-between items-center cursor-pointer min-h-16 rounded-lg' /* Increased min-h and added rounding here */,
+                  selectedRoom?.id === room.id
+                    ? 'bg-gray-200'
+                    : 'hover:bg-gray-100',
+                  // Apply bottom border conditionally or to all except last one
+                  // For simplicity, let's remove default border-b and use gap
+                  // 'border-b border-gray-200' // Remove this if using border-spacing
+                ]"
+              >
+                <div class="flex items-center text-base">
+                  <Hash class="pr-2"></Hash>
+                  {{ room.name }}
+                </div>
+
+                <button
+                  @click.stop="handleClickInvite(room)"
+                  class="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                >
+                  <UserPlus />
                 </button>
               </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div v-if="invitedChatRooms.length" class="text-sm text-gray-600">
-          Invited Rooms
-        </div>
-        <table v-if="invitedChatRooms.length" class="w-full border-separate">
-          <tbody>
-            <tr
-              v-for="room in invitedChatRooms"
-              :key="room.id"
-              :class="[
-                'cursor-pointer',
-                selectedRoom?.id === room.id
-                  ? 'bg-blue-100'
-                  : 'hover:bg-gray-100',
-              ]"
-              @click="selectRoom(room)"
-            >
-              <td class="p-2 border-b border-gray-200">{{ room.name }}</td>
             </tr>
           </tbody>
         </table>
@@ -74,15 +75,25 @@
     <Dialog
       v-model:visible="createRoomDialogOpen"
       model
-      header="Create Room"
-      position="topleft"
+      header="Create New Channel"
+      :draggable="false"
+      :pt="{
+        root: ' min-w-[400px] md:min-w-[500px] min-h-[250px]',
+      }"
     >
-      <div class="flex flex-col gap-4">
-        <div class="flex flex-col">
-          <label>Name</label>
-          <InputText v-model="newRoomName"></InputText>
+      <div class="flex flex-col">
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-col">
+            <label class="pb-2">Channel Name</label>
+            <InputText v-model="newRoomName"></InputText>
+          </div>
+          <button
+            class="bg-gray-800 hover:bg-gray-500 rounded py-2 px-4 text-white"
+            @click="() => createRoom(newRoomName)"
+          >
+            Create
+          </button>
         </div>
-        <Button @click="() => createRoom(newRoomName)">Create</Button>
       </div>
     </Dialog>
 
@@ -93,9 +104,11 @@
     >
     </Dialog>
 
-    <!-- Main Chat Area -->
     <main class="flex-1 p-4 flex flex-col overflow-hidden">
-      <h3 v-if="selectedRoom" class="text-lg font-semibold text-left">
+      <h3
+        v-if="selectedRoom"
+        class="text-lg text-gray-600 font-semibold text-left"
+      >
         {{ selectedRoom.name }}
       </h3>
 
@@ -106,7 +119,6 @@
         {{ error }}
       </div>
 
-      <!-- Messages container: scrollable and fills available space -->
       <div
         v-if="!loadingMessages && messages.length"
         ref="messagesContainer"
@@ -138,17 +150,11 @@
         </div>
       </div>
 
-      <!-- No messages -->
       <div
         v-else-if="selectedRoom && !loadingMessages && !messages.length"
         class="mt-4 text-sm text-gray-500"
       >
-        No messages yet in this chat room.
-      </div>
-
-      <!-- No room selected -->
-      <div v-else-if="!selectedRoom" class="mt-4 text-sm text-gray-500">
-        Select a chat room to view messages.
+        Nothing yet!
       </div>
     </main>
   </div>
@@ -158,15 +164,12 @@
 import { ref, onMounted, watch, nextTick } from "vue";
 import { getCurrentUserObj } from "@/utils/auth";
 import { InputText } from "primevue";
-import router from "../router";
 import {
   getChatRooms,
   getMessages,
   createChatRoom,
   getFriends,
 } from "@/utils/api";
-import { navItems, onClickNavigate } from "../router";
-import NavBar from "./NavBar.vue";
 
 const currentUser = ref("");
 
@@ -276,6 +279,7 @@ watch(messages, async (newVal, oldVal) => {
 
 onMounted(async () => {
   currentUser.value = await getCurrentUserObj().username;
-  fetchChatRooms();
+  await fetchChatRooms();
+  selectRoom(acceptedChatRooms[0]);
 });
 </script>

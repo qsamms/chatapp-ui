@@ -15,13 +15,16 @@ import IftaLabel from "primevue/iftalabel";
 import { FloatLabel } from "primevue";
 import { Form } from "@primevue/forms";
 import Dialog from "primevue/dialog";
-import { User } from "lucide-vue-next";
+import { MessageCircle, User } from "lucide-vue-next";
 import { MessageSquarePlus } from "lucide-vue-next";
 import { MailPlus } from "lucide-vue-next";
-import NavBar from "./components/NavBar.vue";
 import { ArrowLeft } from "lucide-vue-next";
 import { ArrowRight } from "lucide-vue-next";
 import { MessageSquareText } from "lucide-vue-next";
+import { Plus } from "lucide-vue-next";
+import { UserPlus } from "lucide-vue-next";
+import { Hash } from "lucide-vue-next";
+
 import "./index.css";
 
 export const api = axios.create({
@@ -70,9 +73,12 @@ app.component("Dialog", Dialog);
 app.component("UserIcon", User);
 app.component("AddChatRoom", MessageSquarePlus);
 app.component("MailPlus", MailPlus);
-app.component("NavBar", NavBar);
 app.component("ArrowLeft", ArrowLeft);
 app.component("ArrowRight", ArrowRight);
 app.component("MessageSquareText", MessageSquareText);
+app.component("Plus", Plus);
+app.component("UserPlus", UserPlus);
+app.component("Hash", Hash);
+app.component("MessageCircle", MessageCircle);
 
 app.mount("#app");
