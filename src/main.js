@@ -24,6 +24,7 @@ import { MessageSquareText } from "lucide-vue-next";
 import { Plus } from "lucide-vue-next";
 import { UserPlus } from "lucide-vue-next";
 import { Hash } from "lucide-vue-next";
+import { Send } from "lucide-vue-next";
 
 import "./index.css";
 
@@ -80,5 +81,6 @@ app.component("Plus", Plus);
 app.component("UserPlus", UserPlus);
 app.component("Hash", Hash);
 app.component("MessageCircle", MessageCircle);
+app.component("Send", Send);
 
 app.mount("#app");

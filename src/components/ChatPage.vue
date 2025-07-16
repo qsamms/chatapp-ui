@@ -47,8 +47,8 @@
                 :class="[
                   'p-2 flex justify-between items-center cursor-pointer min-h-16 rounded-lg' /* Increased min-h and added rounding here */,
                   selectedRoom?.id === room.id
-                    ? 'bg-gray-200'
-                    : 'hover:bg-gray-100',
+                    ? 'bg-gray-800'
+                    : 'hover:bg-gray-800',
                   // Apply bottom border conditionally or to all except last one
                   // For simplicity, let's remove default border-b and use gap
                   // 'border-b border-gray-200' // Remove this if using border-spacing
@@ -112,15 +112,19 @@
         {{ selectedRoom.name }}
       </h3>
 
-      <div v-if="loadingMessages" class="text-sm text-gray-600">
-        Loading messages...
+      <div
+        v-if="selectedRoom && !loadingMessages && !messages.length"
+        class="mt-4 text-sm text-gray-500"
+      >
+        Nothing yet!
       </div>
+
       <div v-if="error && !loadingMessages" class="text-sm text-red-500">
         {{ error }}
       </div>
 
       <div
-        v-if="!loadingMessages && messages.length"
+        v-if="!loadingMessages && messages.length > 0"
         ref="messagesContainer"
         class="flex-1 overflow-y-auto flex flex-col-reverse space-y-reverse space-y-4"
         @scroll="onScroll"
@@ -129,7 +133,11 @@
           v-for="msg in messages"
           :key="msg.id"
           class="flex flex-col"
-          :class="msg.sender === currentUser ? 'items-end' : 'items-start'"
+          :class="
+            currentUser.value && msg.sender === currentUser.value.username
+              ? 'items-end'
+              : 'items-start'
+          "
         >
           <div class="text-xs text-gray-500 mb-1">
             <span class="font-medium">{{ msg.sender }}</span>
@@ -151,10 +159,22 @@
       </div>
 
       <div
-        v-else-if="selectedRoom && !loadingMessages && !messages.length"
-        class="mt-4 text-sm text-gray-500"
+        v-if="!loadingMessages && selectedRoom && messages.length"
+        class="relative w-full mt-4 flex items-center"
       >
-        Nothing yet!
+        <input
+          v-model="message"
+          @keydown.enter="sendMessage"
+          type="text"
+          :placeholder="`Message ${selectedRoom.name}...`"
+          class="flex-1 p-3 pr-12 text-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-800"
+        />
+        <button
+          @click="sendMessage"
+          class="absolute right-0 mr-2 text-white p-2 rounded-md hover:bg-slate-100 hover:text-gray-800"
+        >
+          <Send></Send>
+        </button>
       </div>
     </main>
   </div>
@@ -171,7 +191,7 @@ import {
   getFriends,
 } from "@/utils/api";
 
-const currentUser = ref("");
+const currentUser = ref(null);
 
 const loadingRooms = ref(false);
 const acceptedChatRooms = ref([]);
@@ -214,7 +234,7 @@ async function fetchMessages(roomId, beforeTimestamp = null) {
   try {
     const res = await getMessages(roomId, beforeTimestamp);
 
-    if (res.data.messages.length === 0) {
+    if (res.data.messages?.length === 0) {
       hasMoreMessages.value = false;
     } else {
       if (beforeTimestamp) {
@@ -278,8 +298,9 @@ watch(messages, async (newVal, oldVal) => {
 });
 
 onMounted(async () => {
-  currentUser.value = await getCurrentUserObj().username;
+  currentUser.value = await getCurrentUserObj();
   await fetchChatRooms();
-  selectRoom(acceptedChatRooms[0]);
+  if (acceptedChatRooms.length) selectRoom(acceptedChatRooms[0]);
+  console.log(currentUser.value.username, messages);
 });
 </script>

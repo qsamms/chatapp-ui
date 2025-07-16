@@ -1,3 +1,4 @@
+import { RepeatOneSharp } from "@mui/icons-material";
 import router from "../router";
 import { getCurrentUser } from "../utils/api";
 
@@ -16,7 +17,8 @@ export async function isTokenValid() {
 
 export async function getCurrentUserObj() {
   try {
-    return await getCurrentUser();
+    const response = await getCurrentUser();
+    return response.data;
   } catch (err) {
     return "";
   }
