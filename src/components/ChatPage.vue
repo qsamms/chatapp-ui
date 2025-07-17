@@ -1,19 +1,19 @@
 <template>
   <div class="flex min-h-screen">
     <aside
-      class="w-80 border-r border-gray-800 overflow-y-auto p-2 flex flex-col justify-between"
+      class="w-80 border-r border-zinc-300 overflow-y-auto flex flex-col justify-between"
     >
       <div>
-        <div v-if="loadingRooms" class="text-sm text-gray-600">
+        <div v-if="loadingRooms" class="text-sm text-zinc-950 p-2">
           Loading rooms...
         </div>
-        <div v-if="error" class="text-sm text-red-500">{{ error }}</div>
+        <div v-if="error" class="text-sm text-red-500 p-2">{{ error }}</div>
 
         <div
           v-if="acceptedChatRooms.length"
-          class="text-sm text-gray-600 border-gray-800 border-b-2 pb-4 pt-4"
+          class="text-sm w-full text-zinc-950 border-zinc-300 border-b-2 pl-2 pb-4 pt-4 pr-2"
         >
-          <div class="flex justify-between items-center">
+          <div class="flex justify-between items-center w-full">
             <div class="flex text-lg">
               <div class="pr-2">
                 <MessageCircle></MessageCircle>
@@ -23,17 +23,17 @@
           </div>
         </div>
 
-        <div class="flex justify-between text-lg text-gray-600 pt-4">
+        <div class="flex justify-between text-lg text-zinc-950 pt-4 pl-2 pr-2">
           <span>Channels</span
           ><Plus
             @click="createRoomDialogOpen = true"
-            class="cursor-pointer hover:opacity-80"
+            class="cursor-pointer hover:bg-zinc-950 hover:text-white rounded-md"
           ></Plus>
         </div>
 
         <table
           v-if="acceptedChatRooms.length"
-          class="w-full mb-4 mt-2"
+          class="w-full mb-4 mt-2 pl-2 pr-2"
           style="border-collapse: separate; border-spacing: 0 0.5rem"
         >
           <tbody>
@@ -45,53 +45,66 @@
             >
               <td
                 :class="[
-                  'p-2 flex justify-between items-center cursor-pointer min-h-16 rounded-lg' /* Increased min-h and added rounding here */,
+                  'p-2 flex justify-between items-center cursor-pointer min-h-12 rounded-lg',
                   selectedRoom?.id === room.id
-                    ? 'bg-gray-800'
-                    : 'hover:bg-gray-800',
-                  // Apply bottom border conditionally or to all except last one
-                  // For simplicity, let's remove default border-b and use gap
-                  // 'border-b border-gray-200' // Remove this if using border-spacing
+                    ? 'bg-zinc-950 text-white'
+                    : 'hover:bg-zinc-200',
                 ]"
               >
                 <div class="flex items-center text-base">
                   <Hash class="pr-2"></Hash>
-                  {{ room.name }}
+                  <span>{{ room.name }}</span>
                 </div>
 
                 <button
                   @click.stop="handleClickInvite(room)"
-                  class="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-transparent border-none p-0"
                 >
-                  <UserPlus />
+                  <UserPlus class="w-6 h-6" />
                 </button>
               </td>
             </tr>
           </tbody>
         </table>
+      
+      </div>
+      <div class="pt-4 pb-4 pl-2 pr-2 border-t-2 border-zinc-300">
+        <div class="flex items-center text-lg text-zinc-950 pl-4 pr-4 py-2 hover:bg-zinc-200 rounded-lg cursor-pointer">
+        <Settings class="pr-2 w-6 h-6"></Settings>
+      Settings
+        </div>
       </div>
     </aside>
 
     <Dialog
       v-model:visible="createRoomDialogOpen"
       model
-      header="Create New Channel"
       :draggable="false"
+      :dismissableMask="true"
+      :closeOnEscape="true"
       :pt="{
-        root: ' min-w-[400px] md:min-w-[500px] min-h-[250px]',
+        root: 'border-2 border-zinc-950 min-w-[400px] md:min-w-[500px] min-h-[250px]',
       }"
     >
-      <div class="flex flex-col">
-        <div class="flex flex-col gap-4">
-          <div class="flex flex-col">
-            <label class="pb-2">Channel Name</label>
-            <InputText v-model="newRoomName"></InputText>
+      <template #header>
+        <div class="flex items-center text-lg font-semibold">
+          <Hash class="mr-2 w-5 h-5" /> Create New Channel
+        </div>
+      </template>
+      <div class="flex flex-col gap-4">
+        <div class="text-sm text-gray-400 pt-1">
+          Create a new channel to chat with friends/teammates.
+        </div>
+        <div class="flex flex-col gap-4 pl-2 pr-2">
+          <div class="flex flex-col ">
+            <label class="pb-2">Channel Name *</label>
+            <input v-model="newRoomName" class="flex-1 p-3 border border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"></input>
           </div>
           <button
             class="bg-gray-800 hover:bg-gray-500 rounded py-2 px-4 text-white"
             @click="() => createRoom(newRoomName)"
           >
-            Create
+            Create Channel
           </button>
         </div>
       </div>
@@ -101,32 +114,27 @@
       v-model:visible="inviteFriendsDialogOpen"
       model
       header="Invite Friends"
+      :draggable="false"
+      :dismissableMask="true"
+      :pt="{
+        root: 'min-w-[400px] md:min-w-[500px] min-h-[250px]',
+      }"
     >
     </Dialog>
 
     <main class="flex-1 p-4 flex flex-col overflow-hidden">
       <h3
         v-if="selectedRoom"
-        class="text-lg text-gray-600 font-semibold text-left"
+        class="w-full flex items-center text-lg text-zinc-950 font-semibold text-left border-b-2 border-zinc-300 pb-4"
       >
+        <Hash class="pr-2"></Hash>
         {{ selectedRoom.name }}
       </h3>
 
       <div
-        v-if="selectedRoom && !loadingMessages && !messages.length"
-        class="mt-4 text-sm text-gray-500"
-      >
-        Nothing yet!
-      </div>
-
-      <div v-if="error && !loadingMessages" class="text-sm text-red-500">
-        {{ error }}
-      </div>
-
-      <div
         v-if="!loadingMessages && messages.length > 0"
         ref="messagesContainer"
-        class="flex-1 overflow-y-auto flex flex-col-reverse space-y-reverse space-y-4"
+        class="flex-1 overflow-y-auto flex flex-col-reverse space-y-reverse space-y-4 pr-2"
         @scroll="onScroll"
       >
         <div
@@ -148,7 +156,7 @@
           <div
             :class="[
               'p-3 rounded shadow max-w-xs md:max-w-md lg:max-w-lg break-words',
-              msg.sender === currentUser
+              currentUser.value && msg.sender === currentUser.value.username // Corrected condition
                 ? 'bg-blue-200 text-right'
                 : 'bg-gray-100 text-left',
             ]"
@@ -159,21 +167,32 @@
       </div>
 
       <div
-        v-if="!loadingMessages && selectedRoom && messages.length"
-        class="relative w-full mt-4 flex items-center"
+        v-if="selectedRoom && !loadingMessages && !messages.length"
+        class="mt-4 text-sm text-center text-gray-500 flex-1"
+      >
+        Nothing yet!
+      </div>
+
+      <div v-if="error && !loadingMessages" class="text-sm text-red-500 flex-1">
+        {{ error }}
+      </div>
+
+      <div
+        v-if="selectedRoom && !loadingMessages"
+        class="w-full mt-4 flex items-center rounded-lg p-2"
       >
         <input
           v-model="message"
           @keydown.enter="sendMessage"
           type="text"
           :placeholder="`Message ${selectedRoom.name}...`"
-          class="flex-1 p-3 pr-12 text-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-800"
+          class="flex-1 p-3 border border-zinc-950 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-950"
         />
         <button
           @click="sendMessage"
-          class="absolute right-0 mr-2 text-white p-2 rounded-md hover:bg-slate-100 hover:text-gray-800"
+          class="flex items-center justify-center h-12 w-12 ml-2 rounded-lg hover:bg-zinc-950 hover:text-white transition-colors duration-200"
         >
-          <Send></Send>
+          <Send class="w-6 h-6"></Send>
         </button>
       </div>
     </main>

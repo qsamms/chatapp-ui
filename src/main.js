@@ -4,15 +4,12 @@ import PrimeVue from "primevue/config";
 
 import App from "./App.vue";
 import router from "./router";
-import Aura from "@primeuix/themes/aura";
 
 import InputText from "primevue/inputtext";
 import Button from "primevue/button";
 import Password from "primevue/password";
 import Card from "primevue/card";
 import Message from "primevue/message";
-import IftaLabel from "primevue/iftalabel";
-import { FloatLabel } from "primevue";
 import { Form } from "@primevue/forms";
 import Dialog from "primevue/dialog";
 import { MessageCircle, User } from "lucide-vue-next";
@@ -25,6 +22,7 @@ import { Plus } from "lucide-vue-next";
 import { UserPlus } from "lucide-vue-next";
 import { Hash } from "lucide-vue-next";
 import { Send } from "lucide-vue-next";
+import { Settings } from "lucide-vue-next";
 
 import "./index.css";
 
@@ -55,11 +53,7 @@ api.interceptors.response.use(
 const app = createApp(App);
 
 app.use(router);
-app.use(PrimeVue, {
-  theme: {
-    preset: Aura,
-  },
-});
+app.use(PrimeVue);
 
 /* eslint-disable vue/multi-word-component-names */
 app.component("Button", Button);
@@ -67,8 +61,6 @@ app.component("Password", Password);
 app.component("Card", Card);
 app.component("Message", Message);
 app.component("InputText", InputText);
-app.component("IftaLabel", IftaLabel);
-app.component("FloatLabel", FloatLabel);
 app.component("Form", Form);
 app.component("Dialog", Dialog);
 app.component("UserIcon", User);
@@ -82,5 +74,6 @@ app.component("UserPlus", UserPlus);
 app.component("Hash", Hash);
 app.component("MessageCircle", MessageCircle);
 app.component("Send", Send);
+app.component("Settings", Settings);
 
 app.mount("#app");
