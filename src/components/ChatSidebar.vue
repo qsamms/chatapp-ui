@@ -9,7 +9,7 @@
 
     <div
       v-if="acceptedChatRooms.length"
-      class="text-sm w-full text-zinc-950 border-zinc-300 border-b-2 pl-2 pb-4 pt-4 pr-2"
+      class="text-sm w-full text-zinc-950 border-zinc-300 border-b-2 pl-4 pb-4 pt-4 pr-2"
     >
       <div class="flex justify-between items-center w-full">
         <div class="flex text-lg font-semibold">
@@ -23,19 +23,19 @@
 
     <div class="overflow-scroll">
       <div
-        class="flex justify-between text-md text-zinc-950 pt-4 pl-2 pr-2 font-semibold"
+        class="flex justify-between text-md text-zinc-950 pt-4 pl-4 pr-2 font-semibold"
       >
         <span>CHANNELS</span>
         <Plus
           @click="handleCreateRoom"
-          class="cursor-pointer hover:bg-zinc-300 rounded-md text-zinc-950 w-5 h-5"
+          class="cursor-pointer hover:bg-zinc-100 rounded-md text-zinc-950 w-5 h-5"
         />
       </div>
 
       <div class="overflow-y-auto">
         <table
           v-if="acceptedChatRooms.length"
-          class="w-full mb-4 mt-2 pl-2 pr-2"
+          class="w-full mb-4 pl-2 pr-2"
           style="border-collapse: separate; border-spacing: 0 0.5rem"
         >
           <tbody>

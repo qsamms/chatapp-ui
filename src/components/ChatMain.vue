@@ -30,10 +30,15 @@
               : 'bg-zinc-200 text-zinc-800 text-left',
           ]"
         >
-          <div class="text-left font-semibold pb-1">
-            {{ msg.sender }}
+          <div class="flex items-center">
+            <div class="text-left font-semibold">
+              {{ msg.sender }}
+            </div>
+            <div class="pl-2 pt-1 text-xs text-zinc-400">
+              {{ formatTimestamp(msg.timestamp) }}
+            </div>
           </div>
-          <div>{{ msg.content }}</div>
+          <div class="pt-1">{{ msg.content }}</div>
         </div>
       </div>
     </div>
@@ -85,6 +90,40 @@ const props = defineProps({
   messages: Array,
   currentUser: Object,
 });
+
+function formatTimestamp(timestamp) {
+  const date = new Date(timestamp);
+
+  const now = new Date();
+  const isToday =
+    date.getUTCFullYear() === now.getUTCFullYear() &&
+    date.getUTCMonth() === now.getUTCMonth() &&
+    date.getUTCDate() === now.getUTCDate();
+
+  const localDate = new Date(
+    date.toLocaleString("en-US", {
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    })
+  );
+
+  const options = {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  };
+
+  const timeString = localDate.toLocaleTimeString(undefined, options);
+
+  if (isToday) {
+    return timeString;
+  } else {
+    const dateString = localDate.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
+    return `${dateString}, ${timeString}`;
+  }
+}
 
 const emit = defineEmits(["send-message"]);
 const newMessage = ref("");

@@ -17,7 +17,7 @@
 
     <Dialog
       v-model:visible="createRoomDialogOpen"
-      model
+      modal
       :draggable="false"
       :dismissableMask="true"
       :closeOnEscape="true"
