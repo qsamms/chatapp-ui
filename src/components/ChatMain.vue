@@ -9,9 +9,9 @@
     </h3>
 
     <div
-      v-if="!loadingMessages && messages.length > 0"
+      v-if="currentUser && !loadingMessages && messages.length > 0"
       ref="messagesContainer"
-      class="flex-1 overflow-y-auto flex flex-col-reverse space-y-reverse space-y-4 pr-2"
+      class="flex-1 overflow-y-auto flex flex-col-reverse space-y-reverse space-y-4 pr-2 pl-2"
       @scroll="onScroll"
     >
       <div
@@ -19,25 +19,20 @@
         :key="msg.id"
         class="flex flex-col"
         :class="
-          currentUser.value && msg.sender === currentUser.value.username
-            ? 'items-end'
-            : 'items-start'
+          msg.sender === currentUser.username ? 'items-end' : 'items-start'
         "
       >
-        <div class="text-xs text-gray-500 mb-1">
-          <span class="font-medium">{{ msg.sender }}</span>
-          ·
-          <span>{{ new Date(msg.timestamp).toLocaleString() }}</span>
-        </div>
-
         <div
           :class="[
-            'p-3 rounded shadow max-w-xs md:max-w-md lg:max-w-lg break-words',
-            currentUser.value && msg.sender === currentUser.value.username // Corrected condition
-              ? 'bg-blue-200 text-right'
-              : 'bg-gray-100 text-left',
+            'p-3 rounded-lg shadow max-w-xs md:max-w-md lg:max-w-lg break-words',
+            msg.sender === currentUser.username
+              ? 'bg-zinc-950 text-zinc-200 text-right'
+              : 'bg-zinc-200 text-zinc-800 text-left',
           ]"
         >
+          <div class="text-left font-semibold pb-1">
+            {{ msg.sender }}
+          </div>
           <div>{{ msg.content }}</div>
         </div>
       </div>
@@ -70,7 +65,7 @@
         @keydown.enter="sendMessage"
         type="text"
         :placeholder="`Message ${selectedRoom.name}...`"
-        class="flex-1 p-3 border border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
+        class="flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
       />
       <button
         @click="sendMessage"
@@ -88,6 +83,7 @@ import { ref } from "vue";
 const props = defineProps({
   selectedRoom: Object,
   messages: Array,
+  currentUser: Object,
 });
 
 const emit = defineEmits(["send-message"]);

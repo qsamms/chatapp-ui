@@ -9,7 +9,11 @@
       @select-room="selectRoom"
       @invite-room="handleClickInvite"
     />
-    <ChatMain :selectedRoom="selectedRoom" :messages="messages" />
+    <ChatMain
+      :selectedRoom="selectedRoom"
+      :messages="messages"
+      :currentUser="currentUser"
+    />
 
     <Dialog
       v-model:visible="createRoomDialogOpen"
