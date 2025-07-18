@@ -29,7 +29,6 @@
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
     "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
     "@vue/eslint-config-standard": "^9.0.1",
     "autoprefixer": "^10.4.21",

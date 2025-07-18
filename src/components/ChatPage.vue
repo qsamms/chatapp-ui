@@ -1,77 +1,82 @@
 <template>
-  <div class="flex min-h-screen">
+  <div class="flex max-h-screen">
     <aside
-      class="w-80 border-r border-zinc-300 overflow-y-auto flex flex-col justify-between"
+      class="w-80 border-r border-zinc-300 flex flex-col justify-between overflow-scroll max-h-screen"
     >
-      <div>
-        <div v-if="loadingRooms" class="text-sm text-zinc-950 p-2">
-          Loading rooms...
-        </div>
-        <div v-if="error" class="text-sm text-red-500 p-2">{{ error }}</div>
+      <div v-if="loadingRooms" class="text-sm text-zinc-950 p-2">
+        Loading rooms...
+      </div>
+      <div v-if="error" class="text-sm text-red-500 p-2">{{ error }}</div>
 
-        <div
-          v-if="acceptedChatRooms.length"
-          class="text-sm w-full text-zinc-950 border-zinc-300 border-b-2 pl-2 pb-4 pt-4 pr-2"
-        >
-          <div class="flex justify-between items-center w-full">
-            <div class="flex text-lg">
-              <div class="pr-2">
-                <MessageCircle></MessageCircle>
-              </div>
-              Chats
+      <div
+        v-if="acceptedChatRooms.length"
+        class="text-sm w-full text-zinc-950 border-zinc-300 border-b-2 pl-2 pb-4 pt-4 pr-2"
+      >
+        <div class="flex justify-between items-center w-full">
+          <div class="flex text-lg font-semibold">
+            <div class="pr-2">
+              <MessageCircle></MessageCircle>
             </div>
+            Chats
           </div>
         </div>
+      </div>
 
-        <div class="flex justify-between text-lg text-zinc-950 pt-4 pl-2 pr-2">
-          <span>Channels</span
+      <div class="overflow-scroll">
+        <div
+          class="flex justify-between text-md text-zinc-950 pt-4 pl-2 pr-2 font-semibold"
+        >
+          <span>CHANNELS</span
           ><Plus
             @click="createRoomDialogOpen = true"
-            class="cursor-pointer hover:bg-zinc-950 hover:text-white rounded-md"
+            class="cursor-pointer hover:bg-zinc-950 hover:text-white rounded-md text-zinc-500 w-5 h-5"
           ></Plus>
         </div>
 
-        <table
-          v-if="acceptedChatRooms.length"
-          class="w-full mb-4 mt-2 pl-2 pr-2"
-          style="border-collapse: separate; border-spacing: 0 0.5rem"
-        >
-          <tbody>
-            <tr
-              v-for="room in acceptedChatRooms"
-              :key="room.id"
-              class="group"
-              @click="selectRoom(room)"
-            >
-              <td
-                :class="[
-                  'p-2 flex justify-between items-center cursor-pointer min-h-12 rounded-lg',
-                  selectedRoom?.id === room.id
-                    ? 'bg-zinc-950 text-white'
-                    : 'hover:bg-zinc-200',
-                ]"
+        <div class="overflow-y-auto">
+          <table
+            v-if="acceptedChatRooms.length"
+            class="w-full mb-4 mt-2 pl-2 pr-2"
+            style="border-collapse: separate; border-spacing: 0 0.5rem"
+          >
+            <tbody>
+              <tr
+                v-for="room in acceptedChatRooms"
+                :key="room.id"
+                class="group"
+                @click="selectRoom(room)"
               >
-                <div class="flex items-center text-base">
-                  <Hash class="pr-2"></Hash>
-                  <span>{{ room.name }}</span>
-                </div>
-
-                <button
-                  @click.stop="handleClickInvite(room)"
-                  class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-transparent border-none p-0"
+                <td
+                  :class="[
+                    'p-2 flex justify-between items-center cursor-pointer min-h-8 rounded-lg',
+                    selectedRoom?.id === room.id
+                      ? 'bg-zinc-950 text-white'
+                      : 'hover:bg-zinc-200 text-zinc-600',
+                  ]"
                 >
-                  <UserPlus class="w-6 h-6" />
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      
+                  <div class="flex items-center text-base">
+                    <Hash class="pr-2"></Hash>
+                    <span>{{ room.name }}</span>
+                  </div>
+
+                  <button
+                    @click.stop="handleClickInvite(room)"
+                    class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-transparent border-none p-0"
+                  >
+                    <UserPlus class="w-6 h-6" />
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
       <div class="pt-4 pb-4 pl-2 pr-2 border-t-2 border-zinc-300">
-        <div class="flex items-center text-lg text-zinc-950 pl-4 pr-4 py-2 hover:bg-zinc-200 rounded-lg cursor-pointer">
-        <Settings class="pr-2 w-6 h-6"></Settings>
-      Settings
+        <div
+          class="flex items-center text-md text-zinc-950 pl-4 pr-4 py-2 hover:bg-zinc-200 rounded-lg cursor-pointer"
+        >
+          <Settings class="pr-2 w-6 h-6"></Settings>
+          Settings
         </div>
       </div>
     </aside>
@@ -96,9 +101,12 @@
           Create a new channel to chat with friends/teammates.
         </div>
         <div class="flex flex-col gap-4 pl-2 pr-2">
-          <div class="flex flex-col ">
+          <div class="flex flex-col">
             <label class="pb-2">Channel Name *</label>
-            <input v-model="newRoomName" class="flex-1 p-3 border border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"></input>
+            <input
+              v-model="newRoomName"
+              class="flex-1 p-3 border border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
+            />
           </div>
           <button
             class="bg-gray-800 hover:bg-gray-500 rounded py-2 px-4 text-white"
@@ -122,10 +130,10 @@
     >
     </Dialog>
 
-    <main class="flex-1 p-4 flex flex-col overflow-hidden">
+    <main class="w-full flex-1 pt-4 flex flex-col overflow-hidden">
       <h3
         v-if="selectedRoom"
-        class="w-full flex items-center text-lg text-zinc-950 font-semibold text-left border-b-2 border-zinc-300 pb-4"
+        class="w-full flex items-center text-lg text-zinc-950 font-semibold text-left border-b-2 border-zinc-300 pb-4 pl-4"
       >
         <Hash class="pr-2"></Hash>
         {{ selectedRoom.name }}
@@ -179,14 +187,14 @@
 
       <div
         v-if="selectedRoom && !loadingMessages"
-        class="w-full mt-4 flex items-center rounded-lg p-2"
+        class="w-full mt-4 flex items-center pl-2 pr-2 pt-4 pb-4 border-t-2 border-zinc-300"
       >
         <input
           v-model="message"
           @keydown.enter="sendMessage"
           type="text"
           :placeholder="`Message ${selectedRoom.name}...`"
-          class="flex-1 p-3 border border-zinc-950 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-950"
+          class="flex-1 p-3 border border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
         />
         <button
           @click="sendMessage"
