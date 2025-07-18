@@ -12,7 +12,7 @@ import Card from "primevue/card";
 import Message from "primevue/message";
 import { Form } from "@primevue/forms";
 import Dialog from "primevue/dialog";
-import { MessageCircle, User } from "lucide-vue-next";
+import { EyeOff, MessageCircle, User } from "lucide-vue-next";
 import { MessageSquarePlus } from "lucide-vue-next";
 import { MailPlus } from "lucide-vue-next";
 import { ArrowLeft } from "lucide-vue-next";
@@ -23,6 +23,7 @@ import { UserPlus } from "lucide-vue-next";
 import { Hash } from "lucide-vue-next";
 import { Send } from "lucide-vue-next";
 import { Settings } from "lucide-vue-next";
+import { Eye } from "lucide-vue-next";
 
 import "./index.css";
 
@@ -75,5 +76,7 @@ app.component("Hash", Hash);
 app.component("MessageCircle", MessageCircle);
 app.component("Send", Send);
 app.component("Settings", Settings);
+app.component("Eye", Eye);
+app.component("EyeOff", EyeOff);
 
 app.mount("#app");
