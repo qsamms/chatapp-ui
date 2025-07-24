@@ -2,10 +2,47 @@
   <main class="w-full flex-1 pt-4 flex flex-col overflow-hidden">
     <h3
       v-if="selectedRoom"
-      class="w-full flex items-center text-lg text-zinc-950 font-semibold text-left border-b-2 border-zinc-300 pb-4 pl-4"
+      class="w-full flex items-center justify-between text-lg text-zinc-950 font-semibold text-left border-b-2 border-zinc-300 pb-4 pl-4"
     >
-      <Hash class="pr-2"></Hash>
-      {{ selectedRoom.name }}
+      <div class="flex">
+        <Hash class="pr-2"></Hash>
+        {{ selectedRoom.name }}
+      </div>
+
+      <div
+        class="relative inline-block"
+        @click="handleClickParticipants"
+        :ref="participantsButtonRef"
+      >
+        <div class="flex mr-4 hover:bg-gray-200 rounded-lg p-2">
+          <div class="pr-2">
+            {{ selectedRoom.participants.length }}
+          </div>
+          <Users />
+        </div>
+
+        <BaseDialog
+          v-model="isParticipantsShowing"
+          :target="participantsButtonRef"
+          :is-modal="false"
+        >
+          <div class="flex p-4 border-b-2 border-gray-200">
+            <div class="mr-2">
+              <Users />
+            </div>
+            Channel Members
+          </div>
+          <ul class="text-sm text-zinc-950 p-2">
+            <li
+              v-for="participant in selectedRoom.participants"
+              :key="participant.id"
+              class="p-2 py-1 hover:bg-gray-100 cursor-pointer truncate rounded-md"
+            >
+              {{ participant.username }}
+            </li>
+          </ul>
+        </BaseDialog>
+      </div>
     </h3>
 
     <div
@@ -84,12 +121,21 @@
 
 <script setup>
 import { ref } from "vue";
+import BaseDialog from "./Dialog.vue";
 
 const props = defineProps({
   selectedRoom: Object,
   messages: Array,
   currentUser: Object,
 });
+
+const isParticipantsShowing = ref(false);
+const participantsButtonRef = ref(null);
+
+function handleClickParticipants() {
+  isParticipantsShowing.value = !isParticipantsShowing.value;
+  console.log(isParticipantsShowing);
+}
 
 function formatTimestamp(timestamp) {
   const date = new Date(timestamp);

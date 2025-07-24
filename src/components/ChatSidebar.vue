@@ -72,6 +72,7 @@
     </div>
     <div class="pt-2 pb-2 pl-2 pr-2 border-t-2 border-zinc-300">
       <div
+        @click="onClickSettingsDialogOpen"
         class="flex items-center text-md text-zinc-950 pl-4 pr-4 py-2 hover:bg-zinc-200 rounded-lg cursor-pointer"
       >
         <Settings class="pr-2 w-6 h-6" />
@@ -89,7 +90,16 @@ const props = defineProps([
   "error",
 ]);
 
-const emit = defineEmits(["select-room", "open-create-room", "invite-room"]);
+const emit = defineEmits([
+  "select-room",
+  "open-create-room",
+  "invite-room",
+  "settings-clicked",
+]);
+
+function onClickSettingsDialogOpen() {
+  emit("settings-clicked");
+}
 
 function handleRoomClick(room) {
   emit("select-room", room);
@@ -103,3 +113,4 @@ function handleClickInvite(room) {
   emit("invite-room");
 }
 </script>
+@

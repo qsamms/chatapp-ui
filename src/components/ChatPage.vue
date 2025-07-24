@@ -5,9 +5,11 @@
       :acceptedChatRooms="acceptedChatRooms"
       :selectedRoom="selectedRoom"
       :error="error"
+      :settingsDialogOpen="settingsDialogOpen"
       @open-create-room="createRoomDialogOpen = true"
       @select-room="selectRoom"
       @invite-room="handleClickInvite"
+      @settings-clicked="handleClickSettings"
     />
     <ChatMain
       :selectedRoom="selectedRoom"
@@ -15,7 +17,11 @@
       :currentUser="currentUser"
     />
 
-    <BaseDialog v-model="createRoomDialogOpen" :closeOnEscape="true">
+    <BaseDialog
+      v-model="createRoomDialogOpen"
+      :closeOnEscape="true"
+      :darkBackground="true"
+    >
       <template #header>
         <div class="flex flex-col">
           <div class="text-lg font-semibold flex items-center">
@@ -47,7 +53,11 @@
       </div>
     </BaseDialog>
 
-    <BaseDialog v-model="inviteFriendsDialogOpen">
+    <BaseDialog
+      v-model="inviteFriendsDialogOpen"
+      :closeOnEscape="true"
+      :darkBackground="true"
+    >
       <template #header>
         <div class="flex flex-col">
           <div class="text-lg font-semibold flex items-center">
@@ -90,12 +100,18 @@
         </div>
       </div>
     </BaseDialog>
+
+    <BaseDialog v-model="settingsDialogOpen">
+      <template #header>
+        <button @click="logout()">logout</button>
+      </template>
+    </BaseDialog>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { getCurrentUserObj } from "@/utils/auth";
+import { getCurrentUserObj, logout } from "@/utils/auth";
 import {
   getChatRooms,
   getMessages,
@@ -124,9 +140,15 @@ const newRoomName = ref("");
 const inviteFriendsDialogOpen = ref(false);
 const currentUserFriends = ref([]);
 
+const settingsDialogOpen = ref(false);
+
 async function handleClickInvite() {
   currentUserFriends.value = (await getFriends()).data;
   inviteFriendsDialogOpen.value = true;
+}
+
+async function handleClickSettings() {
+  settingsDialogOpen.value = true;
 }
 
 async function fetchChatRooms() {
