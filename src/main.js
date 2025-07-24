@@ -24,6 +24,8 @@ import { Hash } from "lucide-vue-next";
 import { Send } from "lucide-vue-next";
 import { Settings } from "lucide-vue-next";
 import { Eye } from "lucide-vue-next";
+import { X } from "lucide-vue-next";
+import { Copy } from "lucide-vue-next";
 
 import "./index.css";
 
@@ -78,5 +80,7 @@ app.component("Send", Send);
 app.component("Settings", Settings);
 app.component("Eye", Eye);
 app.component("EyeOff", EyeOff);
+app.component("X", X);
+app.component("Copy", Copy);
 
 app.mount("#app");

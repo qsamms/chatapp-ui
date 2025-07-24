@@ -1,7 +1,5 @@
 <template>
-  <aside
-    class="w-80 border-r border-zinc-300 flex flex-col justify-between overflow-scroll max-h-screen"
-  >
+  <aside class="w-80 border-r border-zinc-300 flex flex-col justify-between">
     <div v-if="loadingRooms" class="text-sm text-zinc-950 p-2">
       Loading rooms...
     </div>
@@ -21,7 +19,9 @@
       </div>
     </div>
 
-    <div class="overflow-scroll">
+    <div
+      class="flex-1 overflow-hidden hover:overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-400 scrollbar-track-transparent"
+    >
       <div
         class="flex justify-between text-md text-zinc-950 pt-4 pl-4 pr-2 font-semibold"
       >

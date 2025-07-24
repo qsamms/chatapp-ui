@@ -1,72 +1,97 @@
 <template>
-  <div
-    v-if="visible"
-    class="fixed inset-0 z-50 flex items-center justify-center"
-  >
-    <!-- Background overlay -->
-    <div
-      class="fixed inset-0 bg-black bg-opacity-50"
-      @click="dismissableMask ? close() : null"
-    ></div>
-
-    <!-- Dialog panel -->
-    <div
-      class="relative z-10 bg-white border-2 border-zinc-950 rounded-lg p-6 min-w-[400px] md:min-w-[500px] min-h-[250px]"
-      @click.stop
-    >
-      <!-- Close button -->
-      <button
-        v-if="closeOnEscape"
-        class="absolute top-2 right-2 text-gray-500 hover:text-black"
-        @click="close"
+  <teleport to="body">
+    <transition name="fade">
+      <div
+        v-if="visible"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+        @keydown.esc="closeOnEscape && close()"
+        tabindex="0"
       >
-        ✕
-      </button>
+        <div class="absolute inset-0" @click="dismissableMask && close()"></div>
 
-      <!-- Header slot -->
-      <div class="mb-4">
-        <slot name="header" />
-      </div>
+        <transition name="scale-fade">
+          <div
+            class="relative z-10 bg-white rounded-xl shadow-xl p-6 max-w-lg w-full"
+            :class="customClass"
+            @click.stop
+          >
+            <div v-if="$slots.header" class="flex justify-between mb-4">
+              <slot name="header" />
+              <X
+                @click="close()"
+                class="hover:bg-zinc-200 rounded-lg hover:cursor-pointer"
+              ></X>
+            </div>
 
-      <!-- Body slot -->
-      <div>
-        <slot />
+            <slot />
+
+            <div v-if="$slots.footer" class="mt-4">
+              <slot name="footer" />
+            </div>
+          </div>
+        </transition>
       </div>
-    </div>
-  </div>
+    </transition>
+  </teleport>
 </template>
 
 <script setup>
+import { watch, ref, onMounted, onUnmounted } from "vue";
+
 const props = defineProps({
-  visible: Boolean,
+  modelValue: Boolean,
   dismissableMask: { type: Boolean, default: true },
   closeOnEscape: { type: Boolean, default: true },
+  customClass: { type: String, default: "" },
 });
+const emit = defineEmits(["update:modelValue"]);
 
-const emit = defineEmits(["update:visible"]);
+const visible = ref(props.modelValue);
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    visible.value = val;
+  }
+);
 
 function close() {
-  emit("update:visible", false);
+  visible.value = false;
+  emit("update:modelValue", false);
 }
 
-// Close on ESC key
 onMounted(() => {
-  if (props.closeOnEscape) {
-    window.addEventListener("keydown", onEsc);
-  }
+  if (visible.value) document.body.classList.add("overflow-hidden");
 });
-
-onBeforeUnmount(() => {
-  if (props.closeOnEscape) {
-    window.removeEventListener("keydown", onEsc);
-  }
+onUnmounted(() => {
+  document.body.classList.remove("overflow-hidden");
 });
-
-function onEsc(e) {
-  if (e.key === "Escape") close();
-}
+watch(visible, (val) => {
+  if (val) document.body.classList.add("overflow-hidden");
+  else document.body.classList.remove("overflow-hidden");
+});
 </script>
 
 <style scoped>
-/* You can style transitions or dark mode here if needed */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.scale-fade-enter-active,
+.scale-fade-leave-active {
+  transition: all 0.2s ease;
+}
+.scale-fade-enter-from {
+  opacity: 0;
+  transform: scale(0.95);
+}
+.scale-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
 </style>
