@@ -28,3 +28,11 @@ export async function createChatRoom(name) {
 export async function getFriends() {
   return await api.get("/friendships/accepted/");
 }
+
+export async function getChatRoomInviteLink(chatRoomId) {
+  return await api.get(`/rooms/${chatRoomId}/invite-link/`);
+}
+
+export async function joinRoom(inviteId) {
+  return await api.post(`/rooms/join/${inviteId}/`);
+}

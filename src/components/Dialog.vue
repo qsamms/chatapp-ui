@@ -43,6 +43,7 @@ const props = defineProps({
   dismissableMask: { type: Boolean, default: true },
   closeOnEscape: { type: Boolean, default: true },
   customClass: { type: String, default: "" },
+  onOpen: Function,
 });
 const emit = defineEmits(["update:modelValue"]);
 
@@ -67,8 +68,12 @@ onUnmounted(() => {
   document.body.classList.remove("overflow-hidden");
 });
 watch(visible, (val) => {
-  if (val) document.body.classList.add("overflow-hidden");
-  else document.body.classList.remove("overflow-hidden");
+  if (val) {
+    document.body.classList.add("overflow-hidden");
+    if (props.onOpen) props.onOpen();
+  } else {
+    document.body.classList.remove("overflow-hidden");
+  }
 });
 </script>
 

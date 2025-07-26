@@ -78,10 +78,11 @@
             <div class="flex items-center">
               <input
                 readonly
-                placeholder="somelink"
+                :placeholder="inviteLink"
                 class="flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
               />
               <Copy
+                @click="handleClickCopy"
                 class="ml-2 pl-2 w-8 h-8 text-zinc-500 cursor-pointer hover:text-zinc-950 hover:bg-gray-200 rounded-lg p-1"
               />
             </div>
@@ -117,7 +118,7 @@ import {
   getChatRooms,
   getMessages,
   createChatRoom,
-  getFriends,
+  getChatRoomInviteLink,
 } from "@/utils/api";
 import ChatSidebar from "./ChatSidebar.vue";
 import ChatMain from "./ChatMain.vue";
@@ -127,9 +128,6 @@ import SockJS from "sockjs-client";
 import { BACKEND_URL } from "@/main";
 
 let client = null;
-const socket = new SockJS(
-  `${BACKEND_URL}/ws?token=${encodeURIComponent(localStorage.getItem("token"))}`
-);
 const currentUser = ref(null);
 
 const loadingRooms = ref(false);
@@ -146,12 +144,18 @@ const createRoomDialogOpen = ref(false);
 const newRoomName = ref("");
 
 const inviteFriendsDialogOpen = ref(false);
-const currentUserFriends = ref([]);
 
 const settingsDialogOpen = ref(false);
 
-async function handleClickInvite() {
-  currentUserFriends.value = (await getFriends()).data;
+const inviteLink = ref("");
+
+function handleClickCopy() {
+  navigator.clipboard.writeText(inviteLink.value);
+}
+
+async function handleClickInvite(room) {
+  const inviteId = (await getChatRoomInviteLink(room.id)).data.id;
+  inviteLink.value = `${BACKEND_URL}/rooms/join/${inviteId}/`;
   inviteFriendsDialogOpen.value = true;
 }
 
@@ -199,35 +203,46 @@ async function fetchMessages(roomId, beforeTimestamp = null) {
   }
 }
 
-function selectRoom(room) {
+async function selectRoom(room) {
   selectedRoom.value = room;
   messages.value = [];
   hasMoreMessages.value = true;
   fetchMessages(room.id);
-  initWSConnection();
+  await initWSConnection();
 }
 
-function initWSConnection() {
+async function initWSConnection() {
+  if (client) await client.deactivate({ force: true });
   client = new Client({
-    webSocketFactory: () => socket,
+    webSocketFactory: () =>
+      new SockJS(
+        `${BACKEND_URL}/ws?token=${encodeURIComponent(
+          localStorage.getItem("token")
+        )}`
+      ),
     onConnect: function (frame) {
       client.subscribe(
         `/topic/chatroom/${selectedRoom.value.id}/`,
         (message) => {
-          console.log("recieved message: ", message.body);
           const messageBody = JSON.parse(message.body);
           if (message.body) {
-            messages.value = [messages, messageBody];
+            messages.value = [messageBody, ...messages.value];
           }
         }
       );
     },
+    debug: (str) => {
+      console.log("STOMP DEBUG:", str);
+    },
+    reconnectDelay: 5000,
+    heartbeatIncoming: 4000,
+    heartbeatOutgoing: 4000,
   });
   client.activate();
 }
 
 function sendMessage(message) {
-  if (client) {
+  if (client && client.connected) {
     client.publish({
       destination: `/app/chatroom/${selectedRoom.value.id}/send/`,
       body: JSON.stringify({ content: message }),

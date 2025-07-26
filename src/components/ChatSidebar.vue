@@ -110,7 +110,7 @@ function handleCreateRoom() {
 }
 
 function handleClickInvite(room) {
-  emit("invite-room");
+  emit("invite-room", room);
 }
 </script>
 @

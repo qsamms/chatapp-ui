@@ -4,12 +4,14 @@ import SignupPage from "../components/SignupPage.vue";
 import ChatPage from "../components/ChatPage.vue";
 import { isTokenValid } from "../utils/auth";
 import { MessageSquareText, Users, User } from "lucide-vue-next";
+import InviteAccept from "@/components/InviteAccept.vue";
 
 const routes = [
   { path: "/login", component: LoginPage },
   { path: "/signup", component: SignupPage },
   { path: "/chat", component: ChatPage, meta: { requiresAuth: true } },
   { path: "/", redirect: "/chat" },
+  { path: "/rooms/join/:inviteId", component: InviteAccept },
 ];
 
 export const navItems = [

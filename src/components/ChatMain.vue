@@ -20,7 +20,7 @@
         <Popover
           ref="op"
           unstyled
-          class="w-64 border-2 border-gray-200 bg-white rounded-lg mr-4 mt-2"
+          class="w-64 border-2 border-gray-200 bg-white rounded-lg mr-4 mt-2 shadow-lg"
         >
           <div class="flex p-4">
             <div class="flex pr-2 mr-2">
@@ -140,6 +140,7 @@ function toggleMembers() {
 }
 
 function formatTimestamp(timestamp) {
+  console.log(props.messages);
   const date = new Date(timestamp);
 
   const now = new Date();
