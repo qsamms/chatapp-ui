@@ -79,10 +79,20 @@
         Settings
       </div>
     </div>
+    <div class="pb-2 pl-2 pr-2 border-zinc-300">
+      <div
+        @click="logout"
+        class="flex items-center text-md text-zinc-950 pl-4 pr-4 py-2 hover:bg-zinc-200 rounded-lg cursor-pointer"
+      >
+        <Logout class="pr-2 w-6 h-6" />
+        Logout
+      </div>
+    </div>
   </aside>
 </template>
 
 <script setup>
+import { logout } from "@/utils/auth";
 const props = defineProps([
   "loadingRooms",
   "acceptedChatRooms",

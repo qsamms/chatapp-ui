@@ -20,8 +20,8 @@ onMounted(async () => {
   const inviteId = route.params.inviteId;
 
   try {
-    await joinRoom(inviteId);
-    router.push("/chat");
+    const roomId = (await joinRoom(inviteId)).data.roomId;
+    router.push(`/chat/${roomId}`);
   } catch (e) {
     error.value = "Failed to join chat room. Invite may be invalid or expired.";
   } finally {

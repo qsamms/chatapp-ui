@@ -105,8 +105,43 @@
 
     <BaseDialog v-model="settingsDialogOpen">
       <template #header>
-        <button @click="logout()">logout</button>
+        <div class="flex"><Settings class="pr-2" />Settings</div>
       </template>
+
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center align-center">
+          <div
+            class="flex ml-2 mt-2 text-zinc-800 flex bg-slate-200 w-10 h-10 rounded-full items-center justify-center"
+          >
+            <div class="text-lg uppercase">
+              {{ currentUser.username[0] }}
+            </div>
+          </div>
+          <div class="pl-2 text-lg">{{ currentUser.username }}</div>
+        </div>
+
+        <div class="flex flex-col pt-4">
+          <label class="pb-2">Display Name</label>
+          <input
+            :value="currentUser.displayName"
+            class="flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
+          />
+        </div>
+
+        <div class="flex flex-col pt-2">
+          <label class="pb-2">Bio</label>
+          <textarea
+            :value="currentUser.bio"
+            class="flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
+          ></textarea>
+        </div>
+      </div>
+
+      <button
+        class="w-full mt-4 bg-zinc-700 text-white py-1 px-4 rounded-md hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 transition duration-150 ease-in-out text-lg"
+      >
+        Save Profile
+      </button>
     </BaseDialog>
   </div>
 </template>
@@ -126,6 +161,11 @@ import BaseDialog from "./Dialog.vue";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { BACKEND_URL } from "@/main";
+import { useRoute, useRouter } from "vue-router";
+
+const route = useRoute();
+const router = useRouter();
+const roomId = route.params.roomId;
 
 let client = null;
 const currentUser = ref(null);
@@ -169,6 +209,16 @@ async function fetchChatRooms() {
     const res = await getChatRooms();
     acceptedChatRooms.value = res.data.accepted;
     invitedChatRooms.value = res.data.invited;
+    if (roomId) {
+      let roomToSelect = null;
+      acceptedChatRooms.value.forEach((room) => {
+        if (room.id === roomId) {
+          roomToSelect = room;
+        }
+      });
+      if (roomToSelect) selectRoom(roomToSelect);
+      return;
+    }
     if (acceptedChatRooms.value.length > 0) {
       selectRoom(acceptedChatRooms.value[0]);
     }
@@ -204,6 +254,7 @@ async function fetchMessages(roomId, beforeTimestamp = null) {
 }
 
 async function selectRoom(room) {
+  router.push(`/chat/${room.id}`);
   selectedRoom.value = room;
   messages.value = [];
   hasMoreMessages.value = true;
@@ -265,6 +316,5 @@ async function createRoom(name) {
 onMounted(async () => {
   currentUser.value = await getCurrentUserObj();
   await fetchChatRooms();
-  if (acceptedChatRooms.length) selectRoom(acceptedChatRooms[0]);
 });
 </script>

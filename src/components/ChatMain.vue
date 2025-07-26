@@ -22,7 +22,7 @@
           unstyled
           class="w-64 border-2 border-gray-200 bg-white rounded-lg mr-4 mt-2 shadow-lg"
         >
-          <div class="flex p-4">
+          <div class="flex px-4 py-2 mt-1 border-b-2 border-gray-200">
             <div class="flex pr-2 mr-2">
               <Users />
               <div class="pl-2">Members</div>
@@ -64,23 +64,41 @@
           msg.sender === currentUser.username ? 'items-end' : 'items-start'
         "
       >
-        <div
-          :class="[
-            'p-3 rounded-lg shadow max-w-xs md:max-w-md lg:max-w-lg break-words',
-            msg.sender === currentUser.username
-              ? 'bg-zinc-950 text-zinc-200 text-right'
-              : 'bg-zinc-200 text-zinc-800 text-left',
-          ]"
-        >
-          <div class="flex items-center">
-            <div class="text-left font-semibold">
-              {{ msg.sender }}
-            </div>
-            <div class="pl-2 pt-1 text-xs text-zinc-400">
-              {{ formatTimestamp(msg.timestamp) }}
+        <div class="flex items-center">
+          <div
+            v-if="msg.sender !== currentUser.username"
+            class="text-zinc-800 flex bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
+          >
+            <div class="uppercase">
+              {{ msg.sender[0] }}
             </div>
           </div>
-          <div class="pt-1">{{ msg.content }}</div>
+          <div
+            :class="[
+              'p-3 rounded-lg shadow max-w-xs md:max-w-md lg:max-w-lg break-words',
+              msg.sender === currentUser.username
+                ? 'bg-zinc-950 text-zinc-200 text-right'
+                : 'bg-slate-200 text-zinc-800 text-left',
+            ]"
+          >
+            <div class="flex items-center">
+              <div class="text-left font-semibold">
+                {{ msg.sender }}
+              </div>
+              <div class="pl-2 text-xs text-zinc-400">
+                {{ formatTimestamp(msg.timestamp) }}
+              </div>
+            </div>
+            <div class="pt-1">{{ msg.content }}</div>
+          </div>
+          <div
+            v-if="msg.sender === currentUser.username"
+            class="ml-2 text-zinc-800 flex bg-slate-200 w-8 h-8 rounded-full items-center justify-center"
+          >
+            <div class="uppercase">
+              {{ msg.sender[0] }}
+            </div>
+          </div>
         </div>
       </div>
     </div>

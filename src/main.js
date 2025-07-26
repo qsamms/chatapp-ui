@@ -29,6 +29,7 @@ import { Settings } from "lucide-vue-next";
 import { Eye } from "lucide-vue-next";
 import { X } from "lucide-vue-next";
 import { Copy } from "lucide-vue-next";
+import { LogOut } from "lucide-vue-next";
 
 import "./index.css";
 
@@ -93,3 +94,4 @@ app.component("EyeOff", EyeOff);
 app.component("X", X);
 app.component("Copy", Copy);
 app.component("Users", Users);
+app.component("Logout", LogOut);

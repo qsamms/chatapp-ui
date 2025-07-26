@@ -9,7 +9,7 @@ import InviteAccept from "@/components/InviteAccept.vue";
 const routes = [
   { path: "/login", component: LoginPage },
   { path: "/signup", component: SignupPage },
-  { path: "/chat", component: ChatPage, meta: { requiresAuth: true } },
+  { path: "/chat/:roomId?", component: ChatPage, meta: { requiresAuth: true } },
   { path: "/", redirect: "/chat" },
   { path: "/rooms/join/:inviteId", component: InviteAccept },
 ];
