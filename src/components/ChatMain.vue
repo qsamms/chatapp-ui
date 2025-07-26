@@ -89,14 +89,21 @@
                 {{ formatTimestamp(msg.timestamp) }}
               </div>
             </div>
-            <div class="pt-1">{{ msg.content }}</div>
-            <div v-if="msg.mediaUrl && isImage(msg.mediaUrl)" class="mt-2">
+            <div v-if="msg.mediaUrl" class="mt-2">
+              <DashPlayer
+                v-if="isDashVideo(msg.mediaUrl)"
+                :src="`${BACKEND_URL}/${msg.mediaUrl}`"
+              />
               <img
+                v-else-if="
+                  isImage(msg.mediaUrl) && imageBlobs.get(msg.mediaUrl)
+                "
                 :src="imageBlobs.get(msg.mediaUrl)"
                 alt="Attached Image"
                 class="max-w-full h-auto rounded-lg shadow-md"
               />
             </div>
+            <div class="pt-1 text-left">{{ msg.content }}</div>
           </div>
           <div
             v-if="msg.sender === currentUser.username"
@@ -189,7 +196,11 @@
         @click="sendMessage"
         class="flex items-center justify-center h-12 w-12 ml-2 rounded-lg hover:bg-zinc-950 hover:text-white transition-colors duration-200"
       >
-        <Send class="w-6 h-6"></Send>
+        <LoaderCircle
+          v-if="isSending"
+          class="w-6 h-6 animate-spin"
+        ></LoaderCircle>
+        <Send v-else class="w-6 h-6"></Send>
       </button>
     </div>
   </main>
@@ -197,7 +208,9 @@
 
 <script setup>
 import { uploadFiles, fetchImageBlob } from "@/utils/api";
-import { ref, watchEffect } from "vue";
+import { ref, watch } from "vue";
+import DashPlayer from "./DashPlayer.vue";
+import { BACKEND_URL } from "@/main";
 
 const props = defineProps({
   selectedRoom: Object,
@@ -209,27 +222,41 @@ const op = ref(null);
 const fileInput = ref(null);
 const files = ref([]);
 const imageBlobs = ref(new Map());
+const isSending = ref(false);
 
-watchEffect((onCleanup) => {
-  props.messages.forEach(async (msg) => {
-    if (msg.mediaUrl && isImage(msg.mediaUrl)) {
-      if (!imageBlobs.value.has(msg.mediaUrl)) {
-        const blobUrl = await fetchImageBlob(msg.mediaUrl);
-        imageBlobs.value.set(msg.mediaUrl, blobUrl);
+watch(
+  () => props.messages,
+  async (newMessages, _, onCleanup) => {
+    const activeUrls = new Set();
+
+    for (const msg of newMessages) {
+      if (msg.mediaUrl && isImage(msg.mediaUrl)) {
+        if (!imageBlobs.value.has(msg.mediaUrl)) {
+          const blobUrl = await fetchImageBlob(msg.mediaUrl);
+          imageBlobs.value.set(msg.mediaUrl, blobUrl);
+        }
+        activeUrls.add(msg.mediaUrl);
       }
     }
-  });
 
-  onCleanup(() => {
-    for (const [key, url] of imageBlobs.value.entries()) {
-      URL.revokeObjectURL(url);
-      imageBlobs.value.delete(key);
-    }
-  });
-});
+    onCleanup(() => {
+      for (const [key, url] of imageBlobs.value.entries()) {
+        if (!activeUrls.has(key)) {
+          URL.revokeObjectURL(url);
+          imageBlobs.value.delete(key);
+        }
+      }
+    });
+  },
+  { immediate: true, deep: true }
+);
 
 function isImage(url) {
   return /\.(jpeg|jpg|png|gif|webp|bmp)$/i.test(url);
+}
+
+function isDashVideo(url) {
+  return /\.mpd$/i.test(url);
 }
 
 function toggleMembers() {
@@ -286,6 +313,8 @@ const newMessage = ref("");
 async function sendMessage() {
   if (!newMessage.value.trim() && files.value.length == 0) return;
 
+  isSending.value = true;
+
   let mediaUrl = "";
 
   if (files.value.length > 0) {
@@ -298,11 +327,13 @@ async function sendMessage() {
       mediaUrl = response.data;
     } catch (e) {
       console.error(e);
+      isSending.value = false;
       return;
     }
   }
   emit("send-message", { content: newMessage.value, mediaUrl: mediaUrl });
   newMessage.value = "";
   files.value = [];
+  isSending.value = false;
 }
 </script>

@@ -16,7 +16,13 @@ import Dialog from "primevue/dialog";
 import Avatar from "primevue/avatar";
 import FileUpload from "primevue/fileupload";
 
-import { EyeOff, MessageCircle, User, Users } from "lucide-vue-next";
+import {
+  EyeOff,
+  LoaderCircle,
+  MessageCircle,
+  User,
+  Users,
+} from "lucide-vue-next";
 import { MessageSquarePlus } from "lucide-vue-next";
 import { MailPlus } from "lucide-vue-next";
 import { ArrowLeft } from "lucide-vue-next";
@@ -83,6 +89,7 @@ app.component("Popover", Popover);
 app.component("Avatar", Avatar);
 app.component("FileUpload", FileUpload);
 
+app.component("LoaderCircle", LoaderCircle);
 app.component("UserIcon", User);
 app.component("AddChatRoom", MessageSquarePlus);
 app.component("MailPlus", MailPlus);
