@@ -4,14 +4,17 @@ import PrimeVue from "primevue/config";
 
 import App from "./App.vue";
 import router from "./router";
-
+import Aura from "@primeuix/themes";
 import InputText from "primevue/inputtext";
 import Button from "primevue/button";
 import Password from "primevue/password";
 import Card from "primevue/card";
 import Message from "primevue/message";
+import { Popover } from "primevue";
 import { Form } from "@primevue/forms";
 import Dialog from "primevue/dialog";
+import Avatar from "primevue/avatar";
+
 import { EyeOff, MessageCircle, User, Users } from "lucide-vue-next";
 import { MessageSquarePlus } from "lucide-vue-next";
 import { MailPlus } from "lucide-vue-next";
@@ -29,8 +32,11 @@ import { Copy } from "lucide-vue-next";
 
 import "./index.css";
 
+export const BACKEND_URL =
+  import.meta?.en?.BACKNED_URL || "http://localhost:8080";
+
 export const api = axios.create({
-  baseURL: import.meta?.env?.BACKEND_URL || "http://localhost:8080",
+  baseURL: BACKEND_URL,
 });
 
 api.interceptors.request.use((config) => {
@@ -56,7 +62,8 @@ api.interceptors.response.use(
 const app = createApp(App);
 
 app.use(router);
-app.use(PrimeVue);
+app.use(PrimeVue, { theme: { preset: Aura } });
+app.mount("#app");
 
 /* eslint-disable vue/multi-word-component-names */
 app.component("Button", Button);
@@ -66,6 +73,9 @@ app.component("Message", Message);
 app.component("InputText", InputText);
 app.component("Form", Form);
 app.component("Dialog", Dialog);
+app.component("Popover", Popover);
+app.component("Avatar", Avatar);
+
 app.component("UserIcon", User);
 app.component("AddChatRoom", MessageSquarePlus);
 app.component("MailPlus", MailPlus);
@@ -83,5 +93,3 @@ app.component("EyeOff", EyeOff);
 app.component("X", X);
 app.component("Copy", Copy);
 app.component("Users", Users);
-
-app.mount("#app");

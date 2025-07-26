@@ -15,6 +15,7 @@
       :selectedRoom="selectedRoom"
       :messages="messages"
       :currentUser="currentUser"
+      @send-message="sendMessage"
     />
 
     <BaseDialog
@@ -121,7 +122,14 @@ import {
 import ChatSidebar from "./ChatSidebar.vue";
 import ChatMain from "./ChatMain.vue";
 import BaseDialog from "./Dialog.vue";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
+import { BACKEND_URL } from "@/main";
 
+let client = null;
+const socket = new SockJS(
+  `${BACKEND_URL}/ws?token=${encodeURIComponent(localStorage.getItem("token"))}`
+);
 const currentUser = ref(null);
 
 const loadingRooms = ref(false);
@@ -157,6 +165,9 @@ async function fetchChatRooms() {
     const res = await getChatRooms();
     acceptedChatRooms.value = res.data.accepted;
     invitedChatRooms.value = res.data.invited;
+    if (acceptedChatRooms.value.length > 0) {
+      selectRoom(acceptedChatRooms.value[0]);
+    }
   } catch (e) {
     error.value = "Failed to load chat rooms";
   } finally {
@@ -193,6 +204,36 @@ function selectRoom(room) {
   messages.value = [];
   hasMoreMessages.value = true;
   fetchMessages(room.id);
+  initWSConnection();
+}
+
+function initWSConnection() {
+  client = new Client({
+    webSocketFactory: () => socket,
+    onConnect: function (frame) {
+      client.subscribe(
+        `/topic/chatroom/${selectedRoom.value.id}/`,
+        (message) => {
+          console.log("recieved message: ", message.body);
+          const messageBody = JSON.parse(message.body);
+          if (message.body) {
+            messages.value = [messages, messageBody];
+          }
+        }
+      );
+    },
+  });
+  client.activate();
+}
+
+function sendMessage(message) {
+  if (client) {
+    client.publish({
+      destination: `/app/chatroom/${selectedRoom.value.id}/send/`,
+      body: JSON.stringify({ content: message }),
+      headers: { "content-type": "application/json" },
+    });
+  }
 }
 
 async function createRoom(name) {

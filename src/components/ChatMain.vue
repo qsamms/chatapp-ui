@@ -9,11 +9,7 @@
         {{ selectedRoom.name }}
       </div>
 
-      <div
-        class="relative inline-block"
-        @click="handleClickParticipants"
-        :ref="participantsButtonRef"
-      >
+      <div class="relative inline-block" @click="toggleMembers">
         <div class="flex mr-4 hover:bg-gray-200 rounded-lg p-2">
           <div class="pr-2">
             {{ selectedRoom.participants.length }}
@@ -21,27 +17,36 @@
           <Users />
         </div>
 
-        <BaseDialog
-          v-model="isParticipantsShowing"
-          :target="participantsButtonRef"
-          :is-modal="false"
+        <Popover
+          ref="op"
+          unstyled
+          class="w-64 border-2 border-gray-200 bg-white rounded-lg mr-4 mt-2"
         >
-          <div class="flex p-4 border-b-2 border-gray-200">
-            <div class="mr-2">
+          <div class="flex p-4">
+            <div class="flex pr-2 mr-2">
               <Users />
+              <div class="pl-2">Members</div>
             </div>
-            Channel Members
           </div>
           <ul class="text-sm text-zinc-950 p-2">
             <li
               v-for="participant in selectedRoom.participants"
               :key="participant.id"
-              class="p-2 py-1 hover:bg-gray-100 cursor-pointer truncate rounded-md"
+              class="pl-2 py-2 hover:bg-gray-100 cursor-pointer truncate rounded-md flex items-center text-md"
             >
-              {{ participant.username }}
+              <div class="flex items-center">
+                <div
+                  class="flex bg-zinc-400 w-8 h-8 rounded-full items-center justify-center mr-2"
+                >
+                  <div class="uppercase">
+                    {{ participant.username[0] }}
+                  </div>
+                </div>
+                {{ participant.username }}
+              </div>
             </li>
           </ul>
-        </BaseDialog>
+        </Popover>
       </div>
     </h3>
 
@@ -103,7 +108,7 @@
       class="w-full mt-4 flex items-center pl-2 pr-2 pt-4 pb-4 border-t-2 border-zinc-300"
     >
       <input
-        v-model="message"
+        v-model="newMessage"
         @keydown.enter="sendMessage"
         type="text"
         :placeholder="`Message ${selectedRoom.name}...`"
@@ -121,7 +126,6 @@
 
 <script setup>
 import { ref } from "vue";
-import BaseDialog from "./Dialog.vue";
 
 const props = defineProps({
   selectedRoom: Object,
@@ -129,12 +133,10 @@ const props = defineProps({
   currentUser: Object,
 });
 
-const isParticipantsShowing = ref(false);
-const participantsButtonRef = ref(null);
+const op = ref(null);
 
-function handleClickParticipants() {
-  isParticipantsShowing.value = !isParticipantsShowing.value;
-  console.log(isParticipantsShowing);
+function toggleMembers() {
+  op.value.toggle(event);
 }
 
 function formatTimestamp(timestamp) {
