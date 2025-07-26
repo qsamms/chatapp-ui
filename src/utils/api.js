@@ -36,3 +36,18 @@ export async function getChatRoomInviteLink(chatRoomId) {
 export async function joinRoom(inviteId) {
   return await api.post(`/rooms/join/${inviteId}/`);
 }
+
+export async function uploadFiles(formData) {
+  return await api.post("/media/upload/", formData);
+}
+
+export async function fetchImageBlob(mediaUrl) {
+  try {
+    const response = await api.get(mediaUrl, {
+      responseType: "blob",
+    });
+    return URL.createObjectURL(response.data);
+  } catch (error) {
+    console.error("Error fetching image:", error);
+  }
+}

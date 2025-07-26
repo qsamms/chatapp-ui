@@ -90,6 +90,13 @@
               </div>
             </div>
             <div class="pt-1">{{ msg.content }}</div>
+            <div v-if="msg.mediaUrl && isImage(msg.mediaUrl)" class="mt-2">
+              <img
+                :src="imageBlobs.get(msg.mediaUrl)"
+                alt="Attached Image"
+                class="max-w-full h-auto rounded-lg shadow-md"
+              />
+            </div>
           </div>
           <div
             v-if="msg.sender === currentUser.username"
@@ -122,9 +129,55 @@
     </div>
 
     <div
+      v-if="files && files.length > 0"
+      class="w-full mt-4 flex flex-col justify-center px-2 pt-2 border-t-2 border-zinc-300"
+    >
+      <div class="flex items-center text-zinc-700">
+        <Paperclip class="w-6 h-6 pr-2" />
+        <span class="font-semibold">{{ files.length }} file(s) selected</span>
+      </div>
+
+      <div class="flex pt-2 pl-2 gap-2 overflow-x-auto pb-2">
+        <div
+          v-for="(file, index) in files"
+          :key="index"
+          class="flex p-2 rounded-lg bg-gray-200 items-center w-48 flex-shrink-0"
+        >
+          <File class="w-8 h-8 pr-2 flex-shrink-0"></File>
+          <div class="flex flex-col flex-grow min-w-0">
+            <div
+              class="font-semibold text-zinc-950 whitespace-nowrap overflow-hidden text-ellipsis"
+            >
+              {{ file.name }}
+            </div>
+            <div class="text-xs text-zinc-600">
+              {{ Math.round((file.size / 1024 / 1024) * 10) / 10 }} MB
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
       v-if="selectedRoom && !loadingMessages"
       class="w-full mt-4 flex items-center pl-2 pr-2 pt-4 pb-4 border-t-2 border-zinc-300"
     >
+      <input
+        type="file"
+        ref="fileInput"
+        style="display: none"
+        @change="handleFileChange"
+        accept="image/*, video/*"
+        :multiple="false"
+      />
+
+      <button
+        @click="triggerFileInput"
+        class="flex items-center justify-center h-12 w-12 mr-2 rounded-lg hover:bg-zinc-950 hover:text-white transition-colors duration-200"
+        title="Attach File"
+      >
+        <Paperclip class="w-6 h-6"></Paperclip>
+      </button>
       <input
         v-model="newMessage"
         @keydown.enter="sendMessage"
@@ -143,7 +196,8 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { uploadFiles, fetchImageBlob } from "@/utils/api";
+import { ref, watchEffect } from "vue";
 
 const props = defineProps({
   selectedRoom: Object,
@@ -152,6 +206,31 @@ const props = defineProps({
 });
 
 const op = ref(null);
+const fileInput = ref(null);
+const files = ref([]);
+const imageBlobs = ref(new Map());
+
+watchEffect((onCleanup) => {
+  props.messages.forEach(async (msg) => {
+    if (msg.mediaUrl && isImage(msg.mediaUrl)) {
+      if (!imageBlobs.value.has(msg.mediaUrl)) {
+        const blobUrl = await fetchImageBlob(msg.mediaUrl);
+        imageBlobs.value.set(msg.mediaUrl, blobUrl);
+      }
+    }
+  });
+
+  onCleanup(() => {
+    for (const [key, url] of imageBlobs.value.entries()) {
+      URL.revokeObjectURL(url);
+      imageBlobs.value.delete(key);
+    }
+  });
+});
+
+function isImage(url) {
+  return /\.(jpeg|jpg|png|gif|webp|bmp)$/i.test(url);
+}
 
 function toggleMembers() {
   op.value.toggle(event);
@@ -192,12 +271,38 @@ function formatTimestamp(timestamp) {
   }
 }
 
+function handleFileChange(event) {
+  const fileInput = event.target;
+  files.value = fileInput.files;
+}
+
+function triggerFileInput() {
+  fileInput.value.click();
+}
+
 const emit = defineEmits(["send-message"]);
 const newMessage = ref("");
 
-function sendMessage() {
-  if (!newMessage.value.trim()) return;
-  emit("send-message", newMessage.value);
+async function sendMessage() {
+  if (!newMessage.value.trim() && files.value.length == 0) return;
+
+  let mediaUrl = "";
+
+  if (files.value.length > 0) {
+    const formData = new FormData();
+
+    formData.append("file", files.value[0]);
+
+    try {
+      const response = await uploadFiles(formData);
+      mediaUrl = response.data;
+    } catch (e) {
+      console.error(e);
+      return;
+    }
+  }
+  emit("send-message", { content: newMessage.value, mediaUrl: mediaUrl });
   newMessage.value = "";
+  files.value = [];
 }
 </script>

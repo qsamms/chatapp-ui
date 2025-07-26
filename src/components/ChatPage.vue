@@ -296,7 +296,7 @@ function sendMessage(message) {
   if (client && client.connected) {
     client.publish({
       destination: `/app/chatroom/${selectedRoom.value.id}/send/`,
-      body: JSON.stringify({ content: message }),
+      body: JSON.stringify(message),
       headers: { "content-type": "application/json" },
     });
   }

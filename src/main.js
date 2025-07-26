@@ -14,6 +14,7 @@ import { Popover } from "primevue";
 import { Form } from "@primevue/forms";
 import Dialog from "primevue/dialog";
 import Avatar from "primevue/avatar";
+import FileUpload from "primevue/fileupload";
 
 import { EyeOff, MessageCircle, User, Users } from "lucide-vue-next";
 import { MessageSquarePlus } from "lucide-vue-next";
@@ -30,6 +31,8 @@ import { Eye } from "lucide-vue-next";
 import { X } from "lucide-vue-next";
 import { Copy } from "lucide-vue-next";
 import { LogOut } from "lucide-vue-next";
+import { Paperclip } from "lucide-vue-next";
+import { File } from "lucide-vue-next";
 
 import "./index.css";
 
@@ -78,6 +81,7 @@ app.component("Form", Form);
 app.component("Dialog", Dialog);
 app.component("Popover", Popover);
 app.component("Avatar", Avatar);
+app.component("FileUpload", FileUpload);
 
 app.component("UserIcon", User);
 app.component("AddChatRoom", MessageSquarePlus);
@@ -97,3 +101,5 @@ app.component("X", X);
 app.component("Copy", Copy);
 app.component("Users", Users);
 app.component("Logout", LogOut);
+app.component("Paperclip", Paperclip);
+app.component("File", File);
