@@ -160,7 +160,7 @@ import ChatMain from "./ChatMain.vue";
 import BaseDialog from "./Dialog.vue";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { BACKEND_URL } from "@/main";
+import { BACKEND_URL, FE_URL } from "@/main";
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
@@ -195,7 +195,7 @@ function handleClickCopy() {
 
 async function handleClickInvite(room) {
   const inviteId = (await getChatRoomInviteLink(room.id)).data.id;
-  inviteLink.value = `${BACKEND_URL}/rooms/join/${inviteId}/`;
+  inviteLink.value = `${FE_URL}/rooms/join/${inviteId}/`;
   inviteFriendsDialogOpen.value = true;
 }
 

@@ -34,7 +34,9 @@ import { LogOut } from "lucide-vue-next";
 import "./index.css";
 
 export const BACKEND_URL =
-  import.meta?.en?.BACKNED_URL || "http://localhost:8080";
+  import.meta?.env?.BACKNED_URL || "http://localhost:8080";
+
+export const FE_URL = import.meta.env?.FRONTEND_URL || "http://localhost:8081";
 
 export const api = axios.create({
   baseURL: BACKEND_URL,
