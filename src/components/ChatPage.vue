@@ -250,6 +250,7 @@ async function fetchMessages() {
 }
 
 async function selectRoom(room) {
+  if (room.id === selectedRoom.value?.id) return;
   router.push(`/chat/${room.id}`);
   selectedRoom.value = room;
   messages.value = [];

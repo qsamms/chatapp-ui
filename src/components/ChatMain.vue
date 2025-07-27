@@ -247,6 +247,12 @@ watch(
       await nextTick();
       scrollToMessage(scrollToMessageId.value);
       scrollToMessageId.value = null;
+    } else {
+      await nextTick();
+      const el = messagesContainer.value;
+      if (el) {
+        el.scrollTop = el.scrollHeight;
+      }
     }
   }
 );
