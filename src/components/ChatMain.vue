@@ -94,12 +94,16 @@
               </div>
               <div v-if="msg.mediaUrl" class="mt-2">
                 <DashPlayer
-                  v-if="isDashVideo(msg.mediaUrl)"
+                  v-if="
+                    isDashVideo(msg.mediaUrl) && visibleMessageIds.has(msg.id)
+                  "
                   :src="`${BACKEND_URL}/${msg.mediaUrl}`"
                 />
                 <img
                   v-else-if="
-                    isImage(msg.mediaUrl) && imageBlobs.get(msg.mediaUrl)
+                    isImage(msg.mediaUrl) &&
+                    imageBlobs.get(msg.mediaUrl) &&
+                    visibleMessageIds.has(msg.id)
                   "
                   :src="imageBlobs.get(msg.mediaUrl)"
                   alt="Attached Image"
@@ -219,7 +223,7 @@
 
 <script setup>
 import { uploadFiles, fetchImageBlob } from "@/utils/api";
-import { ref, watch, nextTick } from "vue";
+import { ref, watch, nextTick, onBeforeUnmount } from "vue";
 import DashPlayer from "./DashPlayer.vue";
 import { BACKEND_URL } from "@/main";
 
@@ -241,6 +245,77 @@ const isSending = ref(false);
 
 const messageRefs = ref(new Map());
 const scrollToMessageId = ref(null);
+
+const visibleMessageIds = ref(new Set());
+
+const observer = new IntersectionObserver(
+  async (entries) => {
+    for (const entry of entries) {
+      const messageId = entry.target.getAttribute("data-message-id");
+      if (!messageId) continue;
+
+      const msg = props.messages.find((m) => m.id === messageId);
+      if (!msg) continue;
+
+      if (entry.isIntersecting) {
+        visibleMessageIds.value.add(messageId);
+
+        // If message has an image and blob not loaded, fetch again
+        if (
+          msg.mediaUrl &&
+          isImage(msg.mediaUrl) &&
+          !imageBlobs.value.has(msg.mediaUrl)
+        ) {
+          try {
+            const blobUrl = await fetchImageBlob(msg.mediaUrl);
+            imageBlobs.value.set(msg.mediaUrl, blobUrl);
+          } catch (e) {
+            console.error(
+              "Failed to fetch image blob for message",
+              messageId,
+              e
+            );
+          }
+        }
+      } else {
+        // On leaving view, revoke blob and remove from visible set
+        if (msg.mediaUrl && imageBlobs.value.has(msg.mediaUrl)) {
+          URL.revokeObjectURL(imageBlobs.value.get(msg.mediaUrl));
+          imageBlobs.value.delete(msg.mediaUrl);
+        }
+        visibleMessageIds.value.delete(messageId);
+      }
+    }
+  },
+  {
+    root: messagesContainer.value,
+    threshold: 0.01,
+  }
+);
+
+watch(
+  () => props.messages,
+  (newMessages, _, onCleanup) => {
+    const activeUrls = new Set(
+      newMessages.map((m) => m.mediaUrl).filter(Boolean)
+    );
+
+    for (const [url, blobUrl] of imageBlobs.value.entries()) {
+      if (!activeUrls.has(url)) {
+        URL.revokeObjectURL(blobUrl);
+        imageBlobs.value.delete(url);
+      }
+    }
+
+    onCleanup(() => {
+      for (const blobUrl of imageBlobs.value.values()) {
+        URL.revokeObjectURL(blobUrl);
+      }
+      imageBlobs.value.clear();
+    });
+  },
+  { immediate: true, deep: true }
+);
 
 function formatFileSize(size) {
   const fileSizeMB = Math.round((size / 1000 / 1000) * 10) / 10;
@@ -278,6 +353,8 @@ function setMessageRef(id) {
   return (el) => {
     if (el) {
       messageRefs.value.set(id, el);
+      el.setAttribute("data-message-id", id);
+      observer.observe(el);
     }
   };
 }
@@ -297,33 +374,6 @@ function autoResize() {
   el.style.height = "auto";
   el.style.height = el.scrollHeight + "px";
 }
-
-watch(
-  () => props.messages,
-  async (newMessages, _, onCleanup) => {
-    const activeUrls = new Set();
-
-    for (const msg of newMessages) {
-      if (msg.mediaUrl && isImage(msg.mediaUrl)) {
-        if (!imageBlobs.value.has(msg.mediaUrl)) {
-          const blobUrl = await fetchImageBlob(msg.mediaUrl);
-          imageBlobs.value.set(msg.mediaUrl, blobUrl);
-        }
-        activeUrls.add(msg.mediaUrl);
-      }
-    }
-
-    onCleanup(() => {
-      for (const [key, url] of imageBlobs.value.entries()) {
-        if (!activeUrls.has(key)) {
-          URL.revokeObjectURL(url);
-          imageBlobs.value.delete(key);
-        }
-      }
-    });
-  },
-  { immediate: true, deep: true }
-);
 
 function isImage(url) {
   return /\.(jpeg|jpg|png|gif|webp|bmp)$/i.test(url);
