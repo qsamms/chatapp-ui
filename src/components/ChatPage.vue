@@ -16,6 +16,7 @@
       :messages="messages"
       :currentUser="currentUser"
       :moreMessages="moreMessages"
+      :isFetchingMore="isFetchingMore"
       @send-message="sendMessage"
       @fetch-more-messages="fetchMoreMessages"
     />
@@ -160,6 +161,8 @@ const roomId = route.params.roomId;
 let client = null;
 const currentUser = ref(null);
 
+const isFetchingMore = ref(false);
+
 const loadingRooms = ref(false);
 const acceptedChatRooms = ref([]);
 const invitedChatRooms = ref([]);
@@ -220,12 +223,14 @@ async function fetchChatRooms() {
 }
 
 async function fetchMoreMessages() {
+  isFetchingMore.value = true;
   const earliestTimestamp = messages.value[0].timestamp;
-  console.log("earliest", earliestTimestamp);
   const res = await getMessages(selectedRoom.value?.id, earliestTimestamp);
+  moreMessages.value = res.data.hasMore;
   const newMessages = res.data.messages;
   newMessages.reverse();
   messages.value = [...newMessages, ...messages.value];
+  isFetchingMore.value = false;
 }
 
 async function fetchMessages() {

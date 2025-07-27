@@ -60,6 +60,7 @@
         <div
           v-for="msg in messages"
           :key="msg.id"
+          :ref="setMessageRef(msg.id)"
           class="flex flex-col"
           :class="
             msg.sender === currentUser.username ? 'items-end' : 'items-start'
@@ -101,7 +102,7 @@
                   "
                   :src="imageBlobs.get(msg.mediaUrl)"
                   alt="Attached Image"
-                  style="max-width: 300px; max-height: 300px"
+                  style="max-width: 400px; max-height: 400px"
                   class="max-w-full h-auto rounded-lg shadow-md"
                 />
               </div>
@@ -225,6 +226,7 @@ const props = defineProps({
   messages: Array,
   currentUser: Object,
   moreMessages: Boolean,
+  isFetchingMore: Boolean,
 });
 
 const messagesContainer = ref(null);
@@ -235,23 +237,36 @@ const files = ref([]);
 const imageBlobs = ref(new Map());
 const isSending = ref(false);
 
-let hasScrolledInitially = false;
+const messageRefs = ref(new Map());
+const scrollToMessageId = ref(null);
+
 watch(
   () => props.messages,
-  async (newMessages) => {
-    if (!hasScrolledInitially && newMessages.length > 0) {
+  async () => {
+    if (scrollToMessageId.value) {
       await nextTick();
-      const el = messagesContainer.value;
-      if (el) {
-        el.scrollTo({
-          top: el.scrollHeight,
-        });
-        hasScrolledInitially = true;
-      }
+      scrollToMessage(scrollToMessageId.value);
+      scrollToMessageId.value = null;
     }
-  },
-  { immediate: true, deep: true }
+  }
 );
+
+function setMessageRef(id) {
+  return (el) => {
+    if (el) {
+      messageRefs.value.set(id, el);
+    }
+  };
+}
+
+function scrollToMessage(messageId) {
+  console.log("asdf");
+
+  const el = messageRefs.value.get(messageId);
+  if (el) {
+    el.scrollIntoView({ block: "start" });
+  }
+}
 
 function autoResize() {
   const el = textAreaRef.value;
@@ -382,15 +397,20 @@ async function sendMessage() {
   });
 }
 
-function onScroll() {
+const onScroll = () => {
   const container = messagesContainer.value;
-
-  if (container) {
-    const SCROLL_THRESHOLD = 200;
-
-    if (container.scrollTop <= SCROLL_THRESHOLD && props.moreMessages) {
-      emit("fetch-more-messages");
+  if (
+    container &&
+    container.scrollTop <= 100 &&
+    props.moreMessages &&
+    !props.isFetchingMore
+  ) {
+    const topMessage = props.messages[0];
+    if (topMessage) {
+      scrollToMessageId.value = topMessage.id;
     }
+
+    emit("fetch-more-messages");
   }
-}
+};
 </script>
