@@ -15,7 +15,9 @@
       :selectedRoom="selectedRoom"
       :messages="messages"
       :currentUser="currentUser"
+      :moreMessages="moreMessages"
       @send-message="sendMessage"
+      @fetch-more-messages="fetchMoreMessages"
     />
 
     <BaseDialog
@@ -166,7 +168,7 @@ const selectedRoom = ref(null);
 const loadingMessages = ref(false);
 const messages = ref([]);
 const error = ref("");
-const hasMoreMessages = ref(true);
+const moreMessages = ref(true);
 
 const createRoomDialogOpen = ref(false);
 const newRoomName = ref("");
@@ -217,25 +219,25 @@ async function fetchChatRooms() {
   }
 }
 
-async function fetchMessages(roomId, beforeTimestamp = null) {
-  if (loadingMessages.value || !hasMoreMessages.value) return;
+async function fetchMoreMessages() {
+  const earliestTimestamp = messages.value[0].timestamp;
+  console.log("earliest", earliestTimestamp);
+  const res = await getMessages(selectedRoom.value?.id, earliestTimestamp);
+  const newMessages = res.data.messages;
+  newMessages.reverse();
+  messages.value = [...newMessages, ...messages.value];
+}
+
+async function fetchMessages() {
   loadingMessages.value = true;
   try {
-    const res = await getMessages(roomId, beforeTimestamp);
-
-    if (res.data.messages?.length === 0) {
-      hasMoreMessages.value = false;
-    } else {
-      if (beforeTimestamp) {
-        messages.value = [...res.data.messages, ...messages.value];
-      } else {
-        messages.value = res.data.messages;
-        messages.value.reverse();
-        hasMoreMessages.value = true;
-      }
-    }
+    const res = await getMessages(selectedRoom.value?.id);
+    const newMessages = res.data.messages;
+    newMessages.reverse();
+    moreMessages.value = res.data.hasMore;
+    messages.value = newMessages;
   } catch (e) {
-    console.log(e);
+    console.error(e);
     error.value = "Failed to load messages";
   } finally {
     loadingMessages.value = false;
@@ -246,8 +248,8 @@ async function selectRoom(room) {
   router.push(`/chat/${room.id}`);
   selectedRoom.value = room;
   messages.value = [];
-  hasMoreMessages.value = true;
-  fetchMessages(room.id);
+  moreMessages.value = true;
+  fetchMessages();
   await initWSConnection();
 }
 

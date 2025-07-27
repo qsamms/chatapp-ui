@@ -53,65 +53,69 @@
     <div
       v-if="currentUser && !loadingMessages && messages.length > 0"
       ref="messagesContainer"
-      class="flex-1 overflow-y-auto flex flex-col space-y-2 pr-2 pl-2"
+      class="flex-1 overflow-y-auto pr-2 pl-2"
       @scroll="onScroll"
     >
-      <div
-        v-for="msg in messages"
-        :key="msg.id"
-        class="flex flex-col"
-        :class="
-          msg.sender === currentUser.username ? 'items-end' : 'items-start'
-        "
-      >
-        <div class="flex items-center">
-          <div
-            v-if="msg.sender !== currentUser.username"
-            class="text-zinc-800 flex bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
-          >
-            <div class="uppercase">
-              {{ msg.sender[0] }}
-            </div>
-          </div>
-          <div
-            :class="[
-              'p-3 rounded-lg shadow max-w-xl break-words',
-              msg.sender === currentUser.username
-                ? 'bg-zinc-950 text-zinc-200 text-right'
-                : 'bg-slate-200 text-zinc-800 text-left',
-            ]"
-          >
-            <div class="flex items-center">
-              <div class="text-left font-semibold">
-                {{ msg.sender }}
-              </div>
-              <div class="pl-2 text-xs text-zinc-400">
-                {{ formatTimestamp(msg.timestamp) }}
+      <div class="flex flex-col justify-end min-h-full space-y-2">
+        <div
+          v-for="msg in messages"
+          :key="msg.id"
+          class="flex flex-col"
+          :class="
+            msg.sender === currentUser.username ? 'items-end' : 'items-start'
+          "
+        >
+          <div class="flex items-center">
+            <div
+              v-if="msg.sender !== currentUser.username"
+              class="text-zinc-800 flex bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
+            >
+              <div class="uppercase">
+                {{ msg.sender[0] }}
               </div>
             </div>
-            <div v-if="msg.mediaUrl" class="mt-2">
-              <DashPlayer
-                v-if="isDashVideo(msg.mediaUrl)"
-                :src="`${BACKEND_URL}/${msg.mediaUrl}`"
-              />
-              <img
-                v-else-if="
-                  isImage(msg.mediaUrl) && imageBlobs.get(msg.mediaUrl)
-                "
-                :src="imageBlobs.get(msg.mediaUrl)"
-                alt="Attached Image"
-                style="max-width: 300px; max-height: 300px"
-                class="max-w-full h-auto rounded-lg shadow-md"
-              />
+            <div
+              :class="[
+                'p-3 rounded-lg shadow max-w-xl break-words',
+                msg.sender === currentUser.username
+                  ? 'bg-zinc-950 text-zinc-200 text-right'
+                  : 'bg-slate-200 text-zinc-800 text-left',
+              ]"
+            >
+              <div class="flex items-center">
+                <div class="text-left font-semibold">
+                  {{ msg.sender }}
+                </div>
+                <div class="pl-2 text-xs text-zinc-400">
+                  {{ formatTimestamp(msg.timestamp) }}
+                </div>
+              </div>
+              <div v-if="msg.mediaUrl" class="mt-2">
+                <DashPlayer
+                  v-if="isDashVideo(msg.mediaUrl)"
+                  :src="`${BACKEND_URL}/${msg.mediaUrl}`"
+                />
+                <img
+                  v-else-if="
+                    isImage(msg.mediaUrl) && imageBlobs.get(msg.mediaUrl)
+                  "
+                  :src="imageBlobs.get(msg.mediaUrl)"
+                  alt="Attached Image"
+                  style="max-width: 300px; max-height: 300px"
+                  class="max-w-full h-auto rounded-lg shadow-md"
+                />
+              </div>
+              <div class="pt-1 text-left whitespace-pre-wrap">
+                {{ msg.content }}
+              </div>
             </div>
-            <div class="pt-1 text-left">{{ msg.content }}</div>
-          </div>
-          <div
-            v-if="msg.sender === currentUser.username"
-            class="ml-2 text-zinc-800 flex bg-slate-200 w-8 h-8 rounded-full items-center justify-center"
-          >
-            <div class="uppercase">
-              {{ msg.sender[0] }}
+            <div
+              v-if="msg.sender === currentUser.username"
+              class="ml-2 text-zinc-800 flex bg-slate-200 w-8 h-8 rounded-full items-center justify-center"
+            >
+              <div class="uppercase">
+                {{ msg.sender[0] }}
+              </div>
             </div>
           </div>
         </div>
@@ -190,11 +194,11 @@
         ref="textAreaRef"
         @input="autoResize"
         v-model="newMessage"
-        @keydown.enter="sendMessage"
+        @keydown.enter="onEnter"
         rows="1"
         type="text"
         :placeholder="`Message ${selectedRoom.name}...`"
-        class="resize-none flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
+        class="scrollbar-hide resize-none flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
       />
       <button
         @click="sendMessage"
@@ -212,7 +216,7 @@
 
 <script setup>
 import { uploadFiles, fetchImageBlob } from "@/utils/api";
-import { ref, watch, nextTick, onMounted } from "vue";
+import { ref, watch, nextTick } from "vue";
 import DashPlayer from "./DashPlayer.vue";
 import { BACKEND_URL } from "@/main";
 
@@ -220,6 +224,7 @@ const props = defineProps({
   selectedRoom: Object,
   messages: Array,
   currentUser: Object,
+  moreMessages: Boolean,
 });
 
 const messagesContainer = ref(null);
@@ -332,8 +337,17 @@ function triggerFileInput() {
   fileInput.value.click();
 }
 
-const emit = defineEmits(["send-message"]);
+const emit = defineEmits(["send-message", "fetch-more-messages"]);
 const newMessage = ref("");
+
+function onEnter(event) {
+  if (event.shiftKey) {
+    return;
+  }
+
+  event.preventDefault();
+  sendMessage();
+}
 
 async function sendMessage() {
   if (!newMessage.value.trim() && files.value.length == 0) return;
@@ -360,21 +374,22 @@ async function sendMessage() {
   newMessage.value = "";
   files.value = [];
   isSending.value = false;
+
+  nextTick(() => {
+    if (textAreaRef.value) {
+      textAreaRef.value.style.height = "auto";
+    }
+  });
 }
 
 function onScroll() {
   const container = messagesContainer.value;
 
-  console.log(
-    container.scrollTop,
-    container.scrollHeight - container.clientHeight
-  );
-
   if (container) {
-    const SCROLL_THRESHOLD = 50;
+    const SCROLL_THRESHOLD = 200;
 
-    if (container.scrollTop <= SCROLL_THRESHOLD) {
-      console.log("at top");
+    if (container.scrollTop <= SCROLL_THRESHOLD && props.moreMessages) {
+      emit("fetch-more-messages");
     }
   }
 }
