@@ -306,31 +306,9 @@ const observer = new IntersectionObserver(
   {
     root: messagesContainer.value,
     threshold: 0.01,
+    rootMargin: "800px 800px 800px 800px",
+    scrollMargin: "800px 800px 800px 800px",
   }
-);
-
-watch(
-  () => props.messages,
-  (newMessages, _, onCleanup) => {
-    const activeUrls = new Set(
-      newMessages.map((m) => m.mediaUrl).filter(Boolean)
-    );
-
-    for (const [url, blobUrl] of imageBlobs.value.entries()) {
-      if (!activeUrls.has(url)) {
-        URL.revokeObjectURL(blobUrl);
-        imageBlobs.value.delete(url);
-      }
-    }
-
-    onCleanup(() => {
-      for (const blobUrl of imageBlobs.value.values()) {
-        URL.revokeObjectURL(blobUrl);
-      }
-      imageBlobs.value.clear();
-    });
-  },
-  { immediate: true, deep: true }
 );
 
 function formatFileSize(size) {
@@ -348,18 +326,38 @@ function shouldShowAvatar(index) {
   return props.messages[index].sender !== props.messages[index - 1].sender;
 }
 
+function scrollToBottom(el) {
+  requestAnimationFrame(() => {
+    el.scrollTop = el.scrollHeight - el.clientHeight;
+    requestAnimationFrame(() => {
+      el.scrollTop = el.scrollHeight - el.clientHeight;
+    });
+  });
+}
+
 watch(
   () => props.messages,
   async () => {
+    await nextTick();
+
+    const el = messagesContainer.value;
+    if (!el) return;
+
     if (scrollToMessageId.value) {
-      await nextTick();
       scrollToMessage(scrollToMessageId.value);
       scrollToMessageId.value = null;
     } else {
-      await nextTick();
-      const el = messagesContainer.value;
-      if (el) {
-        el.scrollTop = el.scrollHeight;
+      scrollToBottom(el);
+    }
+  }
+);
+
+watch(
+  () => props.selectedRoom,
+  async (oldRoom, newRoom) => {
+    if (oldRoom !== newRoom) {
+      for (const [mediaUrl, blobUrl] in imageBlobs.value.entries()) {
+        URL.revokeObjectURL(blobUrl);
       }
     }
   }
@@ -491,6 +489,7 @@ async function sendMessage() {
 
 const onScroll = () => {
   const container = messagesContainer.value;
+
   if (
     container &&
     container.scrollTop <= 100 &&
