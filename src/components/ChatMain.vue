@@ -164,7 +164,7 @@
               {{ file.name }}
             </div>
             <div class="text-xs text-zinc-600">
-              {{ Math.round((file.size / 1024 / 1024) * 10) / 10 }} MB
+              {{ formatFileSize(file.size) }}
             </div>
           </div>
         </div>
@@ -239,6 +239,16 @@ const isSending = ref(false);
 
 const messageRefs = ref(new Map());
 const scrollToMessageId = ref(null);
+
+function formatFileSize(size) {
+  const fileSizeMB = Math.round((size / 1000 / 1000) * 10) / 10;
+  if (fileSizeMB > 0) {
+    return `${fileSizeMB} MB`;
+  } else {
+    const fileSizeKB = Math.round((size / 1000) * 10) / 10;
+    return `${fileSizeKB} KB`;
+  }
+}
 
 watch(
   () => props.messages,
