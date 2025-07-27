@@ -360,8 +360,11 @@ function formatTimestamp(timestamp) {
 }
 
 function handleFileChange(event) {
-  const fileInput = event.target;
-  files.value = fileInput.files;
+  const selectedFiles = event.target.files;
+  if (!selectedFiles || selectedFiles.length === 0) return;
+
+  files.value = Array.from(selectedFiles);
+  event.target.value = null;
 }
 
 function triggerFileInput() {
