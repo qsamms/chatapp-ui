@@ -53,7 +53,7 @@
     <div
       v-if="currentUser && !loadingMessages && messages.length > 0"
       ref="messagesContainer"
-      class="flex-1 overflow-y-auto pr-2 pl-2"
+      class="flex-1 overflow-y-auto p-2"
       @scroll="onScroll"
     >
       <div class="flex flex-col justify-end min-h-full space-y-2">
