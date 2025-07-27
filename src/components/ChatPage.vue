@@ -114,7 +114,7 @@
         <div class="flex flex-col pt-4">
           <label class="pb-2">Display Name</label>
           <input
-            :value="currentUser.displayName"
+            v-model="currentUser.displayName"
             class="flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
           />
         </div>
@@ -122,13 +122,14 @@
         <div class="flex flex-col pt-2">
           <label class="pb-2">Bio</label>
           <textarea
-            :value="currentUser.bio"
+            v-model="currentUser.bio"
             class="flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
           ></textarea>
         </div>
       </div>
 
       <button
+        @click="handleClickSaveProfile"
         class="w-full mt-4 bg-zinc-700 text-white py-1 px-4 rounded-md hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 transition duration-150 ease-in-out text-lg"
       >
         Save Profile
@@ -139,12 +140,13 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { getCurrentUserObj, logout } from "@/utils/auth";
+import { getCurrentUserObj } from "@/utils/auth";
 import {
   getChatRooms,
   getMessages,
   createChatRoom,
   getChatRoomInviteLink,
+  updateUser,
 } from "@/utils/api";
 import ChatSidebar from "./ChatSidebar.vue";
 import ChatMain from "./ChatMain.vue";
@@ -181,6 +183,14 @@ const inviteFriendsDialogOpen = ref(false);
 const settingsDialogOpen = ref(false);
 
 const inviteLink = ref("");
+
+async function handleClickSaveProfile() {
+  await updateUser({
+    bio: currentUser.value.bio,
+    displayName: currentUser.value.displayName,
+  });
+  settingsDialogOpen.value = false;
+}
 
 function handleClickCopy() {
   navigator.clipboard.writeText(inviteLink.value);

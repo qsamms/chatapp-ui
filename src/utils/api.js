@@ -12,6 +12,10 @@ export async function getCurrentUser() {
   return await api.get("/user/me/");
 }
 
+export async function updateUser(data) {
+  return await api.post("/user/me/", data);
+}
+
 export async function getChatRooms() {
   return await api.get("/rooms/");
 }
