@@ -53,7 +53,7 @@
     <div
       v-if="currentUser && !loadingMessages && messages.length > 0"
       ref="messagesContainer"
-      class="flex-1 overflow-y-auto flex flex-col-reverse space-y-reverse space-y-2 pr-2 pl-2"
+      class="flex-1 overflow-y-auto flex flex-col space-y-2 pr-2 pl-2"
       @scroll="onScroll"
     >
       <div
@@ -75,7 +75,7 @@
           </div>
           <div
             :class="[
-              'p-3 rounded-lg shadow max-w-xs md:max-w-md lg:max-w-lg break-words',
+              'p-3 rounded-lg shadow max-w-xl break-words',
               msg.sender === currentUser.username
                 ? 'bg-zinc-950 text-zinc-200 text-right'
                 : 'bg-slate-200 text-zinc-800 text-left',
@@ -212,7 +212,7 @@
 
 <script setup>
 import { uploadFiles, fetchImageBlob } from "@/utils/api";
-import { ref, watch } from "vue";
+import { ref, watch, nextTick, onMounted } from "vue";
 import DashPlayer from "./DashPlayer.vue";
 import { BACKEND_URL } from "@/main";
 
@@ -222,12 +222,31 @@ const props = defineProps({
   currentUser: Object,
 });
 
+const messagesContainer = ref(null);
 const textAreaRef = ref(null);
 const op = ref(null);
 const fileInput = ref(null);
 const files = ref([]);
 const imageBlobs = ref(new Map());
 const isSending = ref(false);
+
+let hasScrolledInitially = false;
+watch(
+  () => props.messages,
+  async (newMessages) => {
+    if (!hasScrolledInitially && newMessages.length > 0) {
+      await nextTick();
+      const el = messagesContainer.value;
+      if (el) {
+        el.scrollTo({
+          top: el.scrollHeight,
+        });
+        hasScrolledInitially = true;
+      }
+    }
+  },
+  { immediate: true, deep: true }
+);
 
 function autoResize() {
   const el = textAreaRef.value;
@@ -341,5 +360,22 @@ async function sendMessage() {
   newMessage.value = "";
   files.value = [];
   isSending.value = false;
+}
+
+function onScroll() {
+  const container = messagesContainer.value;
+
+  console.log(
+    container.scrollTop,
+    container.scrollHeight - container.clientHeight
+  );
+
+  if (container) {
+    const SCROLL_THRESHOLD = 50;
+
+    if (container.scrollTop <= SCROLL_THRESHOLD) {
+      console.log("at top");
+    }
+  }
 }
 </script>

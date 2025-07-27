@@ -230,6 +230,7 @@ async function fetchMessages(roomId, beforeTimestamp = null) {
         messages.value = [...res.data.messages, ...messages.value];
       } else {
         messages.value = res.data.messages;
+        messages.value.reverse();
         hasMoreMessages.value = true;
       }
     }
@@ -265,7 +266,7 @@ async function initWSConnection() {
         (message) => {
           const messageBody = JSON.parse(message.body);
           if (message.body) {
-            messages.value = [messageBody, ...messages.value];
+            messages.value = [...messages.value, messageBody];
           }
         }
       );
