@@ -7,9 +7,13 @@ import { MessageSquareText, Users, User } from "lucide-vue-next";
 import InviteAccept from "@/components/InviteAccept.vue";
 
 const routes = [
-  { path: "/login", component: LoginPage },
-  { path: "/signup", component: SignupPage },
-  { path: "/chat/:roomId?", component: ChatPage, meta: { requiresAuth: true } },
+  { path: "/login", component: LoginPage, meta: { title: "Chat | Login" } },
+  { path: "/signup", component: SignupPage, meta: { title: "Chat | Sign up" } },
+  {
+    path: "/chat/:roomId?",
+    component: ChatPage,
+    meta: { requiresAuth: true, title: "Chat | Rooms" },
+  },
   { path: "/", redirect: "/chat" },
   { path: "/rooms/join/:inviteId", component: InviteAccept },
 ];
@@ -30,6 +34,8 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
+  const defaultTitle = "Chat";
+  document.title = to.meta.title || defaultTitle;
   const requiresAuth = to.meta.requiresAuth;
   const token = localStorage.getItem("token");
   try {

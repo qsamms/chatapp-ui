@@ -87,18 +87,6 @@
               />
             </div>
           </div>
-          <div class="flex flex-col">
-            <label>Invite by email:</label>
-            <div class="flex items-center">
-              <input
-                placeholder="user@somemail.whatever"
-                class="flex-1 p-3 border border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
-              />
-              <Send
-                class="ml-2 w-8 h-8 text-zinc-500 cursor-pointer hover:text-zinc-950 hover:bg-gray-200 rounded-lg p-1"
-              />
-            </div>
-          </div>
         </div>
       </div>
     </BaseDialog>

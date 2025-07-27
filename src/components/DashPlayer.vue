@@ -2,8 +2,7 @@
   <video
     ref="videoEl"
     controls
-    width="480"
-    height="270"
+    width="350"
     class="max-w-full h-auto rounded-lg shadow-md"
   ></video>
 </template>

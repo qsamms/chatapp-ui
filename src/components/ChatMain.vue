@@ -53,7 +53,7 @@
     <div
       v-if="currentUser && !loadingMessages && messages.length > 0"
       ref="messagesContainer"
-      class="flex-1 overflow-y-auto flex flex-col-reverse space-y-reverse space-y-4 pr-2 pl-2"
+      class="flex-1 overflow-y-auto flex flex-col-reverse space-y-reverse space-y-2 pr-2 pl-2"
       @scroll="onScroll"
     >
       <div
@@ -100,6 +100,7 @@
                 "
                 :src="imageBlobs.get(msg.mediaUrl)"
                 alt="Attached Image"
+                style="max-width: 300px; max-height: 300px"
                 class="max-w-full h-auto rounded-lg shadow-md"
               />
             </div>
@@ -185,12 +186,15 @@
       >
         <Paperclip class="w-6 h-6"></Paperclip>
       </button>
-      <input
+      <textarea
+        ref="textAreaRef"
+        @input="autoResize"
         v-model="newMessage"
         @keydown.enter="sendMessage"
+        rows="1"
         type="text"
         :placeholder="`Message ${selectedRoom.name}...`"
-        class="flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
+        class="resize-none flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
       />
       <button
         @click="sendMessage"
@@ -218,11 +222,19 @@ const props = defineProps({
   currentUser: Object,
 });
 
+const textAreaRef = ref(null);
 const op = ref(null);
 const fileInput = ref(null);
 const files = ref([]);
 const imageBlobs = ref(new Map());
 const isSending = ref(false);
+
+function autoResize() {
+  const el = textAreaRef.value;
+  if (!el) return;
+  el.style.height = "auto";
+  el.style.height = el.scrollHeight + "px";
+}
 
 watch(
   () => props.messages,
@@ -264,20 +276,13 @@ function toggleMembers() {
 }
 
 function formatTimestamp(timestamp) {
-  console.log(props.messages);
   const date = new Date(timestamp);
 
   const now = new Date();
   const isToday =
-    date.getUTCFullYear() === now.getUTCFullYear() &&
-    date.getUTCMonth() === now.getUTCMonth() &&
-    date.getUTCDate() === now.getUTCDate();
-
-  const localDate = new Date(
-    date.toLocaleString("en-US", {
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    })
-  );
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate();
 
   const options = {
     hour: "numeric",
@@ -285,15 +290,16 @@ function formatTimestamp(timestamp) {
     hour12: true,
   };
 
-  const timeString = localDate.toLocaleTimeString(undefined, options);
+  const timeString = date.toLocaleTimeString(undefined, options);
 
   if (isToday) {
     return timeString;
   } else {
-    const dateString = localDate.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-    });
+    const dateOptions =
+      date.getFullYear() != now.getFullYear()
+        ? { month: "short", day: "numeric", year: "numeric" }
+        : { month: "short", day: "numeric" };
+    const dateString = date.toLocaleDateString(undefined, dateOptions);
     return `${dateString}, ${timeString}`;
   }
 }
