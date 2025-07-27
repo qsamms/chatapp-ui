@@ -58,7 +58,7 @@
     >
       <div class="flex flex-col justify-end min-h-full space-y-2">
         <div
-          v-for="msg in messages"
+          v-for="(msg, index) in messages"
           :key="msg.id"
           :ref="setMessageRef(msg.id)"
           class="flex flex-col"
@@ -66,15 +66,16 @@
             msg.sender === currentUser.username ? 'items-end' : 'items-start'
           "
         >
-          <div class="flex items-center">
+          <div class="flex items-start">
             <div
-              v-if="msg.sender !== currentUser.username"
+              v-if="
+                msg.sender !== currentUser.username && shouldShowAvatar(index)
+              "
               class="text-zinc-800 flex bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
             >
-              <div class="uppercase">
-                {{ msg.sender[0] }}
-              </div>
+              <div class="uppercase">{{ msg.sender[0] }}</div>
             </div>
+            <div v-else class="w-8 h-8 mr-2"></div>
             <div
               :class="[
                 'p-3 rounded-lg shadow max-w-xl break-words',
@@ -111,13 +112,14 @@
               </div>
             </div>
             <div
-              v-if="msg.sender === currentUser.username"
+              v-if="
+                msg.sender === currentUser.username && shouldShowAvatar(index)
+              "
               class="ml-2 text-zinc-800 flex bg-slate-200 w-8 h-8 rounded-full items-center justify-center"
             >
-              <div class="uppercase">
-                {{ msg.sender[0] }}
-              </div>
+              <div class="uppercase">{{ msg.sender[0] }}</div>
             </div>
+            <div v-else class="w-8 h-8 ml-2"></div>
           </div>
         </div>
       </div>
@@ -248,6 +250,11 @@ function formatFileSize(size) {
     const fileSizeKB = Math.round((size / 1000) * 10) / 10;
     return `${fileSizeKB} KB`;
   }
+}
+
+function shouldShowAvatar(index) {
+  if (index === 0) return true;
+  return props.messages[index].sender !== props.messages[index - 1].sender;
 }
 
 watch(
