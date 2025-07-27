@@ -4,8 +4,8 @@
       v-if="selectedRoom"
       class="w-full flex items-center justify-between text-lg text-zinc-950 font-semibold text-left border-b-2 border-zinc-300 pb-4 pl-4"
     >
-      <div class="flex">
-        <Hash class="pr-2"></Hash>
+      <div class="flex items-center">
+        <Hash class="w-6 h-6 bg-zinc-200 rounded-md p-1 mr-2"></Hash>
         {{ selectedRoom.name }}
       </div>
 
@@ -174,7 +174,7 @@
         <div
           v-for="(file, index) in files"
           :key="index"
-          class="flex p-2 rounded-lg bg-gray-200 items-center w-48 flex-shrink-0"
+          class="flex p-2 rounded-lg bg-gray-200 items-center max-w-48 flex-shrink-0"
         >
           <File class="w-8 h-8 pr-2 flex-shrink-0"></File>
           <div class="flex flex-col flex-grow min-w-0">
@@ -187,6 +187,10 @@
               {{ formatFileSize(file.size) }}
             </div>
           </div>
+          <X
+            class="ml-2 w-4 h-4 hover:text-red-400 hover:cursor-pointer flex-shrink-0"
+            @click="removeFile(file.name)"
+          ></X>
         </div>
       </div>
     </div>
@@ -310,6 +314,21 @@ const observer = new IntersectionObserver(
     scrollMargin: "800px 800px 800px 800px",
   }
 );
+
+async function removeFile(fileName) {
+  console.log(files.value);
+  let newFiles = [];
+
+  for (const file of files.value) {
+    if (file.name !== fileName) {
+      newFiles.push(file);
+    }
+  }
+
+  console.log(newFiles);
+
+  files.value = newFiles;
+}
 
 function formatFileSize(size) {
   const fileSizeMB = Math.round((size / 1000 / 1000) * 10) / 10;
