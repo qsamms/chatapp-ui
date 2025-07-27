@@ -66,64 +66,78 @@
             msg.sender === currentUser.username ? 'items-end' : 'items-start'
           "
         >
-          <div class="flex items-start">
+          <div>
+            <div class="flex items-start">
+              <div
+                v-if="
+                  msg.sender !== currentUser.username && shouldShowAvatar(index)
+                "
+                class="text-zinc-800 flex bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
+              >
+                <div class="uppercase">{{ msg.sender[0] }}</div>
+              </div>
+              <div v-else class="w-8 h-8 mr-2"></div>
+              <div
+                :class="[
+                  'p-3 rounded-lg shadow max-w-xl break-words',
+                  msg.sender === currentUser.username
+                    ? 'bg-zinc-950 text-zinc-200 text-right'
+                    : 'bg-slate-200 text-zinc-800 text-left',
+                ]"
+              >
+                <div class="flex items-center">
+                  <div class="text-left font-semibold">
+                    {{ msg.sender }}
+                  </div>
+                  <div class="pl-2 text-xs text-zinc-400">
+                    {{ formatTimestamp(msg.timestamp) }}
+                  </div>
+                </div>
+                <div v-if="msg.mediaUrl" class="mt-2">
+                  <DashPlayer
+                    v-if="
+                      isDashVideo(msg.mediaUrl) && visibleMessageIds.has(msg.id)
+                    "
+                    :src="`${BACKEND_URL}/${msg.mediaUrl}`"
+                  />
+
+                  <img
+                    v-else-if="
+                      isImage(msg.mediaUrl) &&
+                      imageBlobs.get(msg.mediaUrl) &&
+                      visibleMessageIds.has(msg.id)
+                    "
+                    :src="imageBlobs.get(msg.mediaUrl)"
+                    alt="Attached Image"
+                    style="max-width: 400px; max-height: 400px"
+                    class="max-w-full h-auto rounded-lg shadow-md"
+                  />
+                </div>
+                <div class="pt-1 text-left whitespace-pre-wrap">
+                  {{ msg.content }}
+                </div>
+              </div>
+
+              <div
+                v-if="
+                  msg.sender === currentUser.username && shouldShowAvatar(index)
+                "
+                class="ml-2 text-zinc-800 flex bg-slate-200 w-8 h-8 rounded-full items-center justify-center"
+              >
+                <div class="uppercase">{{ msg.sender[0] }}</div>
+              </div>
+              <div v-else class="w-8 h-8 ml-2"></div>
+            </div>
             <div
               v-if="
-                msg.sender !== currentUser.username && shouldShowAvatar(index)
+                visibleMessageIds.has(msg.id) &&
+                isImage(msg.mediaUrl) &&
+                failedImageUrls.has(msg.mediaUrl)
               "
-              class="text-zinc-800 flex bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
+              class="text-red-400 text-sm"
             >
-              <div class="uppercase">{{ msg.sender[0] }}</div>
+              Failed to load media
             </div>
-            <div v-else class="w-8 h-8 mr-2"></div>
-            <div
-              :class="[
-                'p-3 rounded-lg shadow max-w-xl break-words',
-                msg.sender === currentUser.username
-                  ? 'bg-zinc-950 text-zinc-200 text-right'
-                  : 'bg-slate-200 text-zinc-800 text-left',
-              ]"
-            >
-              <div class="flex items-center">
-                <div class="text-left font-semibold">
-                  {{ msg.sender }}
-                </div>
-                <div class="pl-2 text-xs text-zinc-400">
-                  {{ formatTimestamp(msg.timestamp) }}
-                </div>
-              </div>
-              <div v-if="msg.mediaUrl" class="mt-2">
-                <DashPlayer
-                  v-if="
-                    isDashVideo(msg.mediaUrl) && visibleMessageIds.has(msg.id)
-                  "
-                  :src="`${BACKEND_URL}/${msg.mediaUrl}`"
-                />
-                <img
-                  v-else-if="
-                    isImage(msg.mediaUrl) &&
-                    imageBlobs.get(msg.mediaUrl) &&
-                    visibleMessageIds.has(msg.id)
-                  "
-                  :src="imageBlobs.get(msg.mediaUrl)"
-                  alt="Attached Image"
-                  style="max-width: 400px; max-height: 400px"
-                  class="max-w-full h-auto rounded-lg shadow-md"
-                />
-              </div>
-              <div class="pt-1 text-left whitespace-pre-wrap">
-                {{ msg.content }}
-              </div>
-            </div>
-            <div
-              v-if="
-                msg.sender === currentUser.username && shouldShowAvatar(index)
-              "
-              class="ml-2 text-zinc-800 flex bg-slate-200 w-8 h-8 rounded-full items-center justify-center"
-            >
-              <div class="uppercase">{{ msg.sender[0] }}</div>
-            </div>
-            <div v-else class="w-8 h-8 ml-2"></div>
           </div>
         </div>
       </div>
@@ -241,6 +255,8 @@ const op = ref(null);
 const fileInput = ref(null);
 const files = ref([]);
 const imageBlobs = ref(new Map());
+const failedImageUrls = ref(new Set());
+const loadingBlobs = ref(new Set());
 const isSending = ref(false);
 
 const messageRefs = ref(new Map());
@@ -260,25 +276,25 @@ const observer = new IntersectionObserver(
       if (entry.isIntersecting) {
         visibleMessageIds.value.add(messageId);
 
-        // If message has an image and blob not loaded, fetch again
         if (
           msg.mediaUrl &&
           isImage(msg.mediaUrl) &&
-          !imageBlobs.value.has(msg.mediaUrl)
+          !imageBlobs.value.has(msg.mediaUrl) &&
+          !loadingBlobs.value.has(msg.mediaUrl) &&
+          !failedImageUrls.value.has(msg.mediaUrl)
         ) {
+          loadingBlobs.value.add(msg.mediaUrl);
           try {
             const blobUrl = await fetchImageBlob(msg.mediaUrl);
             imageBlobs.value.set(msg.mediaUrl, blobUrl);
           } catch (e) {
-            console.error(
-              "Failed to fetch image blob for message",
-              messageId,
-              e
-            );
+            console.log("asdf");
+            failedImageUrls.value.add(msg.mediaUrl);
+          } finally {
+            loadingBlobs.value.delete(msg.mediaUrl);
           }
         }
       } else {
-        // On leaving view, revoke blob and remove from visible set
         if (msg.mediaUrl && imageBlobs.value.has(msg.mediaUrl)) {
           URL.revokeObjectURL(imageBlobs.value.get(msg.mediaUrl));
           imageBlobs.value.delete(msg.mediaUrl);

@@ -46,12 +46,8 @@ export async function uploadFiles(formData) {
 }
 
 export async function fetchImageBlob(mediaUrl) {
-  try {
-    const response = await api.get(mediaUrl, {
-      responseType: "blob",
-    });
-    return URL.createObjectURL(response.data);
-  } catch (error) {
-    console.error("Error fetching image:", error);
-  }
+  const response = await api.get(mediaUrl, {
+    responseType: "blob",
+  });
+  return URL.createObjectURL(response.data);
 }
