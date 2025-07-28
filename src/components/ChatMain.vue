@@ -27,6 +27,11 @@
               <Users />
               <div class="pl-2">Members</div>
             </div>
+            <div
+              class="ml-auto text-sm text-right border-2 border-gray-200 rounded-xl px-2"
+            >
+              {{ getNumActiveMembers() }} Online
+            </div>
           </div>
           <ul class="text-sm text-zinc-950 p-2">
             <li
@@ -36,7 +41,7 @@
             >
               <div class="flex items-center">
                 <div
-                  class="flex text-zinc-800 bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
+                  class="relative flex text-zinc-800 bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
                 >
                   <div
                     v-if="participant.displayName"
@@ -47,6 +52,14 @@
                   <div v-else class="uppercase font-semibold">
                     {{ participant.firstName[0] }}{{ participant.lastName[0] }}
                   </div>
+                  <div
+                    class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white"
+                    :class="
+                      isUserOnline(participant.lastHeartbeat)
+                        ? 'bg-green-500'
+                        : 'bg-gray-400'
+                    "
+                  ></div>
                 </div>
                 <div v-if="participant.displayName">
                   {{ participant.displayName }}
@@ -392,6 +405,24 @@ function shouldShowAvatar(index) {
     props.messages[index].sender.username !==
     props.messages[index - 1].sender.username
   );
+}
+
+function isUserOnline(lastHeartbeat) {
+  if (!lastHeartbeat) return false;
+
+  const last = new Date(lastHeartbeat).getTime();
+  const now = Date.now();
+  const diff = now - last;
+
+  return diff < 60_000;
+}
+
+function getNumActiveMembers() {
+  let count = 0;
+  for (const p of props.selectedRoom.participants) {
+    if (isUserOnline(p.lastHeartbeat)) count += 1;
+  }
+  return count;
 }
 
 function scrollToBottom(el) {

@@ -56,3 +56,8 @@ export async function fetchImageBlob(mediaUrl) {
   });
   return URL.createObjectURL(response.data);
 }
+
+export async function sendHeartbeat() {
+  const response = await api.get("/heartbeat/");
+  return response;
+}

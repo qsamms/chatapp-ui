@@ -120,6 +120,8 @@
 import { ref } from "vue";
 import { logout } from "@/utils/auth";
 import Dialog from "./Dialog.vue";
+import { useHeartbeat } from "@/utils/useHeartbeat";
+
 const props = defineProps([
   "loadingRooms",
   "acceptedChatRooms",
@@ -134,6 +136,7 @@ const emit = defineEmits([
   "settings-clicked",
 ]);
 
+useHeartbeat();
 const isLogoutDialogOpen = ref(false);
 
 function openLogoutDialog() {
