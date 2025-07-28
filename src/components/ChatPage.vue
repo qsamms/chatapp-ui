@@ -44,6 +44,7 @@
             <label class="pb-2">Channel Name*</label>
             <input
               v-model="newRoomName"
+              @keyup.enter="() => createRoom(newRoomName)"
               class="flex-1 p-3 border border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
             />
           </div>

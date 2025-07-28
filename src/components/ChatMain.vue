@@ -33,7 +33,7 @@
               {{ getNumActiveMembers() }} Online
             </div>
           </div>
-          <ul class="text-sm text-zinc-950 p-2">
+          <ul class="text-sm text-zinc-950 p-2 overflow-auto max-h-50">
             <li
               v-for="participant in selectedRoom.participants"
               :key="participant.id"
@@ -155,7 +155,7 @@
                       min-width: 300px;
                       max-width: 300px;
                     "
-                    class="max-w-full h-auto rounded-lg shadow-md"
+                    class="max-w-full h-auto rounded"
                   />
                   <div
                     v-else-if="

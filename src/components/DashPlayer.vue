@@ -4,7 +4,7 @@
       ref="videoEl"
       controls
       width="350"
-      class="max-w-full h-auto rounded-lg shadow-md"
+      class="max-w-full h-auto rounded"
     ></video>
   </div>
 </template>
