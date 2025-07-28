@@ -61,3 +61,8 @@ export async function sendHeartbeat() {
   const response = await api.get("/heartbeat/");
   return response;
 }
+
+export async function getParticipants(roomId) {
+  const response = await api.get(`rooms/${roomId}/participants/`);
+  return response;
+}

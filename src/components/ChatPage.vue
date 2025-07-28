@@ -12,6 +12,7 @@
       @settings-clicked="handleClickSettings"
     />
     <ChatMain
+      v-if="selectedRoom"
       :selectedRoom="selectedRoom"
       :messages="messages"
       :currentUser="currentUser"

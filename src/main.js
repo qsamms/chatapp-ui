@@ -67,10 +67,14 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Prevent infinite loop
+    const isRefreshRequest = originalRequest.url?.includes("/api/auth/refresh");
+
     if (
       error.response &&
       error.response.status === 401 &&
-      !originalRequest._retry
+      !originalRequest._retry &&
+      !isRefreshRequest
     ) {
       originalRequest._retry = true;
 
@@ -92,6 +96,7 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
+        // logout on failure
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         router.push("/login");

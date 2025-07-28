@@ -9,10 +9,14 @@
         {{ selectedRoom.name }}
       </div>
 
-      <div class="relative inline-block" @click="toggleMembers">
+      <div
+        v-if="participants.length"
+        class="relative inline-block"
+        @click="toggleMembers"
+      >
         <div class="flex mr-4 hover:bg-gray-200 rounded-lg p-2">
           <div class="pr-2">
-            {{ selectedRoom.participants.length }}
+            {{ participants.length }}
           </div>
           <Users />
         </div>
@@ -35,7 +39,7 @@
           </div>
           <ul class="text-sm text-zinc-950 p-2 overflow-auto max-h-50">
             <li
-              v-for="participant in selectedRoom.participants"
+              v-for="participant in participants"
               :key="participant.id"
               class="pl-2 py-2 hover:bg-gray-100 cursor-pointer truncate rounded-md flex items-center text-md"
             >
@@ -44,28 +48,30 @@
                   class="relative flex text-zinc-800 bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
                 >
                   <div
-                    v-if="participant.displayName"
+                    v-if="participant.user.displayName"
                     class="uppercase font-semibold"
                   >
-                    {{ participant.displayName[0] }}
+                    {{ participant.user.displayName[0] }}
                   </div>
                   <div v-else class="uppercase font-semibold">
-                    {{ participant.firstName[0] }}{{ participant.lastName[0] }}
+                    {{ participant.user.firstName[0]
+                    }}{{ participant.user.lastName[0] }}
                   </div>
                   <div
                     class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white"
                     :class="
-                      isUserOnline(participant.lastHeartbeat)
+                      isUserOnline(participant.user.lastHeartbeat)
                         ? 'bg-green-500'
                         : 'bg-gray-400'
                     "
                   ></div>
                 </div>
-                <div v-if="participant.displayName">
-                  {{ participant.displayName }}
+                <div v-if="participant.user.displayName">
+                  {{ participant.user.displayName }}
                 </div>
                 <div v-else>
-                  {{ participant.firstName }} {{ participant.lastName }}
+                  {{ participant.user.firstName }}
+                  {{ participant.user.lastName }}
                 </div>
               </div>
             </li>
@@ -299,10 +305,10 @@
 
 <script setup>
 import { uploadFiles, fetchImageBlob } from "@/utils/api";
-import { ref, watch, nextTick, onBeforeUnmount } from "vue";
+import { ref, watch, nextTick } from "vue";
 import DashPlayer from "./DashPlayer.vue";
 import { BACKEND_URL } from "@/main";
-import { dividerClasses } from "@mui/material";
+import { useParticipants } from "@/utils/useParticipants";
 
 const props = defineProps({
   selectedRoom: Object,
@@ -311,6 +317,8 @@ const props = defineProps({
   moreMessages: Boolean,
   isFetchingMore: Boolean,
 });
+
+const { participants } = useParticipants(props.selectedRoom.id);
 
 const messagesContainer = ref(null);
 const textAreaRef = ref(null);
@@ -419,8 +427,8 @@ function isUserOnline(lastHeartbeat) {
 
 function getNumActiveMembers() {
   let count = 0;
-  for (const p of props.selectedRoom.participants) {
-    if (isUserOnline(p.lastHeartbeat)) count += 1;
+  for (const p of participants.value) {
+    if (isUserOnline(p.user.lastHeartbeat)) count += 1;
   }
   return count;
 }
