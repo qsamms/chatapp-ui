@@ -76,7 +76,7 @@ api.interceptors.response.use(
 const app = createApp(App);
 
 app.use(router);
-app.use(PrimeVue, { theme: { preset: Aura } });
+app.use(PrimeVue);
 app.mount("#app");
 
 /* eslint-disable vue/multi-word-component-names */
