@@ -18,6 +18,7 @@ import FileUpload from "primevue/fileupload";
 
 import {
   EyeOff,
+  ImageOff,
   LoaderCircle,
   MessageCircle,
   User,
@@ -110,3 +111,4 @@ app.component("Users", Users);
 app.component("Logout", LogOut);
 app.component("Paperclip", Paperclip);
 app.component("File", File);
+app.component("ImageOff", ImageOff);

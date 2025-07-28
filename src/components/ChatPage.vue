@@ -100,15 +100,22 @@
       </template>
 
       <div class="flex flex-col gap-2">
-        <div class="flex items-center align-center">
-          <div
-            class="flex ml-2 mt-2 text-zinc-800 flex bg-slate-200 w-10 h-10 rounded-full items-center justify-center"
-          >
-            <div class="text-lg uppercase">
-              {{ currentUser.username[0] }}
+        <div>
+          <div class="flex items-center align-center">
+            <div
+              class="flex ml-2 mt-2 text-zinc-800 flex bg-slate-200 w-10 h-10 rounded-full items-center justify-center"
+            >
+              <div class="text-lg uppercase">
+                {{ currentUser.firstName[0] }}{{ currentUser.lastName[0] }}
+              </div>
+            </div>
+            <div class="pl-2 text-lg">
+              {{ currentUser.firstName }} {{ currentUser.lastName }}
             </div>
           </div>
-          <div class="pl-2 text-lg">{{ currentUser.username }}</div>
+          <div class="pl-2 text-md pt-4 text-zinc-500">
+            {{ currentUser.email }}
+          </div>
         </div>
 
         <div class="flex flex-col pt-4">

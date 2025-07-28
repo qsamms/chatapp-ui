@@ -1,10 +1,12 @@
 <template>
-  <video
-    ref="videoEl"
-    controls
-    width="350"
-    class="max-w-full h-auto rounded-lg shadow-md"
-  ></video>
+  <div>
+    <video
+      ref="videoEl"
+      controls
+      width="350"
+      class="max-w-full h-auto rounded-lg shadow-md"
+    ></video>
+  </div>
 </template>
 
 <script setup>
@@ -21,6 +23,7 @@ let player;
 onMounted(() => {
   if (videoEl.value && props.src) {
     player = dashjs.MediaPlayer().create();
+
     player.updateSettings({
       streaming: {
         retryIntervals: {
@@ -45,6 +48,7 @@ onMounted(() => {
         },
       },
     });
+
     player.initialize(videoEl.value, props.src, false);
   }
 });

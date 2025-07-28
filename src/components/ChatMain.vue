@@ -36,13 +36,24 @@
             >
               <div class="flex items-center">
                 <div
-                  class="flex bg-zinc-400 w-8 h-8 rounded-full items-center justify-center mr-2"
+                  class="flex text-zinc-800 bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
                 >
-                  <div class="uppercase">
-                    {{ participant.username[0] }}
+                  <div
+                    v-if="participant.displayName"
+                    class="uppercase font-semibold"
+                  >
+                    {{ participant.displayName[0] }}
+                  </div>
+                  <div v-else class="uppercase font-semibold">
+                    {{ participant.firstName[0] }}{{ participant.lastName[0] }}
                   </div>
                 </div>
-                {{ participant.username }}
+                <div v-if="participant.displayName">
+                  {{ participant.displayName }}
+                </div>
+                <div v-else>
+                  {{ participant.firstName }} {{ participant.lastName }}
+                </div>
               </div>
             </li>
           </ul>
@@ -63,31 +74,47 @@
           :ref="setMessageRef(msg.id)"
           class="flex flex-col"
           :class="
-            msg.sender === currentUser.username ? 'items-end' : 'items-start'
+            msg.sender.username === currentUser.username
+              ? 'items-end'
+              : 'items-start'
           "
         >
           <div>
             <div class="flex items-start">
               <div
                 v-if="
-                  msg.sender !== currentUser.username && shouldShowAvatar(index)
+                  msg.sender.username !== currentUser.username &&
+                  shouldShowAvatar(index)
                 "
-                class="text-zinc-800 flex bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
+                class="text-zinc-800 flex bg-slate-200 w-9 h-9 rounded-full items-center justify-center mr-2"
               >
-                <div class="uppercase">{{ msg.sender[0] }}</div>
+                <div
+                  v-if="msg.sender.displayName"
+                  class="uppercase font-semibold"
+                >
+                  {{ msg.sender.displayName[0] }}
+                </div>
+                <div v-else class="uppercase font-semibold">
+                  {{ msg.sender.firstName[0] }}{{ msg.sender.lastName[0] }}
+                </div>
               </div>
               <div v-else class="w-8 h-8 mr-2"></div>
               <div
                 :class="[
                   'p-3 rounded-lg shadow max-w-xl break-words',
-                  msg.sender === currentUser.username
+                  msg.sender.username === currentUser.username
                     ? 'bg-zinc-950 text-zinc-200 text-right'
                     : 'bg-slate-200 text-zinc-800 text-left',
                 ]"
               >
                 <div class="flex items-center">
                   <div class="text-left font-semibold">
-                    {{ msg.sender }}
+                    <div v-if="msg.sender.displayName">
+                      {{ msg.sender.displayName }}
+                    </div>
+                    <div v-else>
+                      {{ msg.sender.firstName }} {{ msg.sender.lastName }}
+                    </div>
                   </div>
                   <div class="pl-2 text-xs text-zinc-400">
                     {{ formatTimestamp(msg.timestamp) }}
@@ -109,9 +136,32 @@
                     "
                     :src="imageBlobs.get(msg.mediaUrl)"
                     alt="Attached Image"
-                    style="max-width: 400px; max-height: 400px"
+                    style="
+                      max-width: 300px;
+                      max-height: 300px;
+                      min-width: 300px;
+                      max-width: 300px;
+                    "
                     class="max-w-full h-auto rounded-lg shadow-md"
                   />
+                  <div
+                    v-else-if="
+                      isImage(msg.mediaUrl) &&
+                      !imageBlobs.has(msg.mediaUrl) &&
+                      visibleMessageIds.has(msg.id)
+                    "
+                    style="width: 300px; height: 200px"
+                    :class="
+                      msg.sender.username !== currentUser.username
+                        ? 'flex flex-col items-center justify-center border-2 border-dashed border-zinc-950 rounded-md'
+                        : 'flex flex-col items-center justify-center border-2 border-dashed text-zinc-200 rounded-md'
+                    "
+                  >
+                    <div class="p-4 flex flex-col items-center">
+                      <ImageOff class="w-8 h-8 pb-2"></ImageOff>
+                      <div>Failed to load image</div>
+                    </div>
+                  </div>
                 </div>
                 <div class="pt-1 text-left whitespace-pre-wrap">
                   {{ msg.content }}
@@ -120,23 +170,22 @@
 
               <div
                 v-if="
-                  msg.sender === currentUser.username && shouldShowAvatar(index)
+                  msg.sender.username === currentUser.username &&
+                  shouldShowAvatar(index)
                 "
-                class="ml-2 text-zinc-800 flex bg-slate-200 w-8 h-8 rounded-full items-center justify-center"
+                class="ml-2 text-zinc-800 flex bg-slate-200 w-9 h-9 rounded-full items-center justify-center"
               >
-                <div class="uppercase">{{ msg.sender[0] }}</div>
+                <div
+                  v-if="msg.sender.displayName"
+                  class="uppercase font-semibold"
+                >
+                  {{ msg.sender.displayName[0] }}
+                </div>
+                <div v-else class="uppercase font-semibold">
+                  {{ msg.sender.firstName[0] }}{{ msg.sender.lastName[0] }}
+                </div>
               </div>
               <div v-else class="w-8 h-8 ml-2"></div>
-            </div>
-            <div
-              v-if="
-                visibleMessageIds.has(msg.id) &&
-                isImage(msg.mediaUrl) &&
-                failedImageUrls.has(msg.mediaUrl)
-              "
-              class="text-red-400 text-sm"
-            >
-              Failed to load media
             </div>
           </div>
         </div>
@@ -244,6 +293,7 @@ import { uploadFiles, fetchImageBlob } from "@/utils/api";
 import { ref, watch, nextTick, onBeforeUnmount } from "vue";
 import DashPlayer from "./DashPlayer.vue";
 import { BACKEND_URL } from "@/main";
+import { dividerClasses } from "@mui/material";
 
 const props = defineProps({
   selectedRoom: Object,
@@ -342,7 +392,10 @@ function formatFileSize(size) {
 
 function shouldShowAvatar(index) {
   if (index === 0) return true;
-  return props.messages[index].sender !== props.messages[index - 1].sender;
+  return (
+    props.messages[index].sender.username !==
+    props.messages[index - 1].sender.username
+  );
 }
 
 function scrollToBottom(el) {

@@ -4,8 +4,13 @@ export async function login(username, password) {
   return await api.post("/auth/login/", { username, password });
 }
 
-export async function signup(email, username, password) {
-  return await api.post("/auth/signup/", { email, username, password });
+export async function signup(email, firstName, lastName, password) {
+  return await api.post("/auth/signup/", {
+    email,
+    firstName,
+    lastName,
+    password,
+  });
 }
 
 export async function getCurrentUser() {
