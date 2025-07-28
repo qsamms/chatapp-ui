@@ -98,7 +98,7 @@
                   {{ msg.sender.firstName[0] }}{{ msg.sender.lastName[0] }}
                 </div>
               </div>
-              <div v-else class="w-8 h-8 mr-2"></div>
+              <div v-else class="w-9 h-9 mr-2"></div>
               <div
                 :class="[
                   'p-3 rounded-lg shadow max-w-xl break-words',
@@ -185,7 +185,7 @@
                   {{ msg.sender.firstName[0] }}{{ msg.sender.lastName[0] }}
                 </div>
               </div>
-              <div v-else class="w-8 h-8 ml-2"></div>
+              <div v-else class="w-9 h-9 ml-2"></div>
             </div>
           </div>
         </div>
