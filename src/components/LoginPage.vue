@@ -93,7 +93,8 @@ async function onClickLogin() {
   }
   try {
     const response = await login(username.value, password.value);
-    localStorage.setItem("token", response.data.token);
+    localStorage.setItem("accessToken", response.data.accessToken);
+    localStorage.setItem("refreshToken", response.data.refreshToken);
     router.push("/chat");
   } catch (err) {
     console.log(err);

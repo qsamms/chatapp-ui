@@ -1,5 +1,7 @@
 <template>
-  <aside class="w-80 border-r border-zinc-300 flex flex-col justify-between">
+  <aside
+    class="w-80 border-r border-zinc-300 flex flex-col justify-between bg-gray-100"
+  >
     <div v-if="loadingRooms" class="text-sm text-zinc-950 p-2">
       Loading rooms...
     </div>

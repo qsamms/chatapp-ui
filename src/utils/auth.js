@@ -3,7 +3,8 @@ import router from "../router";
 import { getCurrentUser } from "../utils/api";
 
 export function logout() {
-  localStorage.removeItem("token");
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
   router.push("/login");
 }
 

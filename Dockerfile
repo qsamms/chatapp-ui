@@ -1,7 +1,7 @@
 FROM node:18-alpine as build-stage
 WORKDIR /app
 COPY . .
-RUN npm install && npm run build
+RUN npm install --force && npm run build
 
 FROM nginx:alpine
 COPY --from=build-stage /app/dist /usr/share/nginx/html

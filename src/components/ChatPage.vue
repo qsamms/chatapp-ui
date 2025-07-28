@@ -282,7 +282,7 @@ async function initWSConnection() {
     webSocketFactory: () =>
       new SockJS(
         `${BACKEND_URL}/ws?token=${encodeURIComponent(
-          localStorage.getItem("token")
+          localStorage.getItem("accessToken")
         )}`
       ),
     onConnect: function (frame) {
