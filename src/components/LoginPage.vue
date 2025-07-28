@@ -14,13 +14,13 @@
             <label
               for="username"
               class="text-left text-sm font-medium text-zinc-700 mb-2"
-              >Username</label
+              >Email</label
             >
             <input
               id="username"
               v-model="username"
               type="text"
-              placeholder="Enter your username"
+              placeholder="Enter your email"
               class="text-zinc-500 p-3 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-transparent transition duration-150 ease-in-out"
             />
           </div>

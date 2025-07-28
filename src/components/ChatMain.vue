@@ -5,7 +5,7 @@
       class="w-full flex items-center justify-between text-lg text-zinc-950 font-semibold text-left border-b-2 border-zinc-300 pb-4 pl-4"
     >
       <div class="flex items-center">
-        <Hash class="w-6 h-6 bg-zinc-200 rounded-md p-1 mr-2"></Hash>
+        <Hash class="w-6 h-6 bg-slate-200 rounded-md p-1 mr-2"></Hash>
         {{ selectedRoom.name }}
       </div>
 
@@ -196,14 +196,10 @@
       v-if="selectedRoom && !loadingMessages && !messages.length"
       class="flex-1 flex items-center justify-center text-sm text-gray-500"
     >
-      Nothing yet, break the ice?
-    </div>
-
-    <div
-      v-if="!selectedRoom && !error"
-      class="flex-1 flex items-center justify-center text-sm text-gray-500"
-    >
-      Select a room to start chatting
+      <div class="flex flex-col items-center">
+        <MessagesSquare class="mb-4 w-8 h-8"></MessagesSquare>
+        Nothing yet, break the ice?
+      </div>
     </div>
 
     <div v-if="error && !loadingMessages" class="text-sm text-red-500 flex-1">

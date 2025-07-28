@@ -25,6 +25,7 @@ import {
   Users,
 } from "lucide-vue-next";
 import { MessageSquarePlus } from "lucide-vue-next";
+import { MessagesSquare } from "lucide-vue-next";
 import { MailPlus } from "lucide-vue-next";
 import { ArrowLeft } from "lucide-vue-next";
 import { ArrowRight } from "lucide-vue-next";
@@ -112,3 +113,4 @@ app.component("Logout", LogOut);
 app.component("Paperclip", Paperclip);
 app.component("File", File);
 app.component("ImageOff", ImageOff);
+app.component("MessagesSquare", MessagesSquare);
