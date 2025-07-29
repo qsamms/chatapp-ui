@@ -172,42 +172,38 @@
                     :src="`${BACKEND_URL}/${msg.mediaUrl}`"
                   />
                   <div
+                    v-else-if="
+                      isImage(msg.mediaUrl) &&
+                      imageBlobs.get(msg.mediaUrl) &&
+                      visibleMessageIds.has(msg.id)
+                    "
                     class="relative"
                     @mouseenter="hoveredImageId = msg.id"
                     @mouseleave="hoveredImageId = null"
                   >
                     <img
-                      v-if="
-                        isImage(msg.mediaUrl) &&
-                        imageBlobs.get(msg.mediaUrl) &&
-                        visibleMessageIds.has(msg.id)
-                      "
                       :src="imageBlobs.get(msg.mediaUrl)"
                       alt="Attached Image"
-                      class="rounded max-w-[300px] transition-all duration-200"
+                      class="rounded max-h-[200px] transition-all duration-200"
                       :class="{ 'brightness-75': hoveredImageId === msg.id }"
                       @click="openImageEnlarged(imageBlobs.get(msg.mediaUrl))"
                     />
                     <div
                       v-if="hoveredImageId === msg.id"
-                      class="absolute inset-0 flex items-center justify-center max-w-[300px] cursor-pointer"
+                      class="absolute inset-0 flex items-center justify-center max-h-[200px] cursor-pointer"
                       @click="openImageEnlarged(imageBlobs.get(msg.mediaUrl))"
                     >
                       <ZoomIn class="w-8 h-8 text-white opacity-90" />
                     </div>
                   </div>
                   <div
-                    v-if="
+                    v-else-if="
                       isImage(msg.mediaUrl) &&
                       !imageBlobs.has(msg.mediaUrl) &&
                       visibleMessageIds.has(msg.id) &&
                       failedImageUrls.has(msg.id)
                     "
-                    :class="
-                      msg.sender.username !== currentUser.username
-                        ? 'flex flex-col items-center justify-center border-2 border-dashed border-zinc-950 rounded-md w-[300px] aspect-[3/2] object-contain'
-                        : 'flex flex-col items-center justify-center border-2 border-dashed text-zinc-200 rounded-md w-[300px] aspect-[3/2] object-contain'
-                    "
+                    class="flex flex-col items-center justify-center border-2 border-dashed border-zinc-950 rounded-md h-[200px] aspect-[3/2] object-contain"
                   >
                     <div class="p-4 flex flex-col items-center">
                       <ImageOff class="w-8 h-8 pb-2"></ImageOff>
@@ -215,13 +211,13 @@
                     </div>
                   </div>
                   <div
-                    v-if="
+                    v-else="
                       isImage(msg.mediaUrl) &&
                       !imageBlobs.has(msg.mediaUrl) &&
                       visibleMessageIds.has(msg.id) &&
                       !failedImageUrls.has(msg.id)
                     "
-                    class="w-[300px] aspect-[3/2] flex items-center justify-center rounded"
+                    class="h-[200px] aspect-[3/2] flex items-center justify-center rounded"
                   >
                     <LoaderCircle class="w-8 h-8 animate-spin"></LoaderCircle>
                   </div>
@@ -494,7 +490,6 @@ const observer = new IntersectionObserver(
             const blobUrl = await fetchImageBlob(msg.mediaUrl);
             imageBlobs.value.set(msg.mediaUrl, blobUrl);
           } catch (e) {
-            console.log("asdf");
             failedImageUrls.value.add(msg.mediaUrl);
           } finally {
             loadingBlobs.value.delete(msg.mediaUrl);
