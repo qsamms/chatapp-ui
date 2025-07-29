@@ -45,6 +45,8 @@ import { Paperclip } from "lucide-vue-next";
 import { File } from "lucide-vue-next";
 import { Ghost } from "lucide-vue-next";
 import { ChevronLeft, ChevronRight } from "lucide-vue-next";
+import { Mail } from "lucide-vue-next";
+import { Heart } from "lucide-vue-next";
 
 import "./index.css";
 
@@ -147,6 +149,7 @@ app.component("Eye", Eye);
 app.component("EyeOff", EyeOff);
 app.component("X", X);
 app.component("Copy", Copy);
+app.component("User", User);
 app.component("Users", Users);
 app.component("Logout", LogOut);
 app.component("Paperclip", Paperclip);
@@ -158,3 +161,5 @@ app.component("CloudMoon", CloudMoon);
 app.component("ZoomIn", ZoomIn);
 app.component("ChevronLeft", ChevronLeft);
 app.component("ChevronRight", ChevronRight);
+app.component("Mail", Mail);
+app.component("Heart", Heart);

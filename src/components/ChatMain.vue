@@ -106,14 +106,14 @@
       class="flex-1 overflow-y-auto min-w-0"
       @scroll="onScroll"
     >
-      <div class="flex flex-col justify-end min-h-full space-y-2">
+      <div class="flex flex-col justify-end min-h-full">
         <div
           v-for="(group, groupIndex) in groupedMessages"
           :key="groupIndex"
           class="flex flex-col p-4 border-b border-gray-200 last:border-b-0 text-zinc-950"
+          :class="groupIndex % 2 === 0 ? 'bg-gray-50' : ''"
         >
           <div class="flex items-start">
-            <!-- Only show avatar for first message in group -->
             <div
               v-if="
                 groupIndex === 0 ||
@@ -132,11 +132,9 @@
                 {{ group.sender.firstName[0] }}{{ group.sender.lastName[0] }}
               </div>
             </div>
-            <!-- Empty spacer when avatar is hidden -->
             <div v-else class="w-9 h-9 mr-2 flex-shrink-0"></div>
 
             <div class="min-w-0 break-words w-full">
-              <!-- Only show sender info for first message in group -->
               <div
                 v-if="
                   groupIndex === 0 ||
@@ -324,44 +322,62 @@
   </main>
   <BaseDialog v-model="isUserDialogOpen">
     <template #header>
-      <div class="flex">User Info</div>
+      <div class="flex items-center">User Profile</div>
     </template>
 
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-4">
       <div>
-        <div class="flex items-center align-center">
+        <div class="flex items-end">
           <div
             class="relative flex ml-2 mt-2 text-zinc-800 flex bg-slate-200 w-10 h-10 rounded-full items-center justify-center"
           >
             <div class="text-lg uppercase flex">
-              {{ selectedUser.firstName[0] }}{{ selectedUser.lastName[0] }}
+              {{ selectedUser.user.firstName[0]
+              }}{{ selectedUser.user.lastName[0] }}
             </div>
             <div
               class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white"
               :class="
-                isUserOnline(selectedUser.lastHeartbeat)
+                isUserOnline(selectedUser.user.lastHeartbeat)
                   ? 'bg-green-500'
                   : 'bg-gray-400'
               "
             ></div>
           </div>
-          <div class="pl-2 text-lg flex">
-            {{ selectedUser.firstName }} {{ selectedUser.lastName }}
-            <div v-if="selectedUser.displayName" class="pl-2">
-              ({{ selectedUser.displayName }})
+          <div class="pl-2 text-lg flex flex-col pt-1">
+            {{ selectedUser.user.firstName }} {{ selectedUser.user.lastName }}
+            <div v-if="selectedUser.user.displayName" class="pl-2 text-xs">
+              ({{ selectedUser.user.displayName }})
             </div>
           </div>
         </div>
         <div class="pl-2 text-md pt-4 text-zinc-500">
-          {{ selectedUser.email }}
+          <div class="flex items-center">
+            <Mail class="w-4 h-4 mr-2"></Mail> {{ selectedUser.user.email }}
+          </div>
         </div>
       </div>
-      <div v-if="selectedUser.bio" class="flex flex-col pt-2">
+      <div v-if="selectedUser.user.bio" class="flex flex-col pt-2">
+        <div class="flex items-center">
+          <User class="w-4 h-4 mr-1"></User>About
+        </div>
         <textarea
           disabled
-          v-model="selectedUser.bio"
+          v-model="selectedUser.user.bio"
           class="resize-none flex-1 p-3 text-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
         ></textarea>
+      </div>
+      <div class="flex gap-2">
+        <button
+          class="text-sm flex w-full justify-center items-center text-zinc-950 mt-4 bg-slate-200 text-white py-1 px-4 rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 transition duration-150 ease-in-out"
+        >
+          <MessageCircle class="w-4 h-4 mr-2"></MessageCircle>Direct Message
+        </button>
+        <button
+          class="text-sm flex items-center justify-center w-full mt-4 bg-zinc-700 hover:bg-zinc-950 text-white py-1 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 transition duration-150 ease-in-out"
+        >
+          <Heart class="w-4 h-4 mr-2"></Heart>Add friend
+        </button>
       </div>
     </div>
   </BaseDialog>
@@ -439,7 +455,7 @@ function closeImageEnlarged() {
 
 function onClickParticipant(participant) {
   if (participant.user.username === props.currentUser.username) return;
-  selectedUser.value = participant.user;
+  selectedUser.value = participant;
   isUserDialogOpen.value = true;
 }
 
@@ -649,7 +665,7 @@ function toggleMembers() {
   op.value.toggle(event);
 }
 
-function formatTimestamp(timestamp) {
+function formatTimestamp(timestamp, formal = false) {
   const date = new Date(timestamp);
 
   const now = new Date();
@@ -666,7 +682,7 @@ function formatTimestamp(timestamp) {
 
   const timeString = date.toLocaleTimeString(undefined, options);
 
-  if (isToday) {
+  if (isToday && !formal) {
     return timeString;
   } else {
     const dateOptions =
