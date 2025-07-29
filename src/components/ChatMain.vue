@@ -408,7 +408,7 @@
 
 <script setup>
 import { uploadFiles, fetchImageBlob } from "@/utils/api";
-import { ref, watch, nextTick, computed } from "vue";
+import { ref, watch, nextTick, computed, onMounted } from "vue";
 import DashPlayer from "./DashPlayer.vue";
 import { BACKEND_URL } from "@/main";
 import { useParticipants } from "@/utils/useParticipants";
@@ -422,7 +422,7 @@ const props = defineProps({
   isFetchingMore: Boolean,
 });
 
-const { participants } = useParticipants(props.selectedRoom.id);
+const { participants } = useParticipants(() => props.selectedRoom.id);
 
 const isUserDialogOpen = ref(false);
 const selectedUser = ref({});
