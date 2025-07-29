@@ -621,8 +621,6 @@ function setMessageRef(id) {
 }
 
 function scrollToMessage(messageId) {
-  console.log("asdf");
-
   const el = messageRefs.value.get(messageId);
   if (el) {
     el.scrollIntoView({ block: "start" });
