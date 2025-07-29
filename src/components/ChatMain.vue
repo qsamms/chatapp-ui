@@ -161,7 +161,7 @@
                 :ref="setMessageRef(msg.id)"
                 class="pt-2 text-left whitespace-pre-wrap break-words"
               >
-                <div class="pt-2 text-left whitespace-pre-wrap break-words">
+                <div class="pt-1 text-left whitespace-pre-wrap break-words">
                   {{ msg.content }}
                 </div>
                 <div v-if="msg.mediaUrl" class="mt-2">
