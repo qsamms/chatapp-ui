@@ -40,7 +40,12 @@
             <li
               v-for="participant in participants"
               :key="participant.id"
-              class="pl-2 py-2 hover:bg-gray-100 cursor-pointer truncate rounded-md flex items-center text-md"
+              class="pl-2 py-2 truncate hover:bg-gray-100 rounded-md flex items-center text-md"
+              :class="[
+                participant.user.username !== currentUser.username
+                  ? 'cursor-pointer'
+                  : '',
+              ]"
               @click="onClickParticipant(participant)"
             >
               <div class="flex items-center">
@@ -98,61 +103,66 @@
     <div
       v-if="currentUser && !loadingMessages && messages.length > 0"
       ref="messagesContainer"
-      class="flex-1 overflow-y-auto p-2"
+      class="flex-1 overflow-y-auto min-w-0"
       @scroll="onScroll"
     >
       <div class="flex flex-col justify-end min-h-full space-y-2">
         <div
-          v-for="(msg, index) in messages"
-          :key="msg.id"
-          :ref="setMessageRef(msg.id)"
-          class="flex flex-col"
-          :class="
-            msg.sender.username === currentUser.username
-              ? 'items-end'
-              : 'items-start'
-          "
+          v-for="(group, groupIndex) in groupedMessages"
+          :key="groupIndex"
+          class="flex flex-col p-4 border-b border-gray-200 last:border-b-0 text-zinc-950"
         >
-          <div>
-            <div class="flex items-start">
+          <div class="flex items-start">
+            <!-- Only show avatar for first message in group -->
+            <div
+              v-if="
+                groupIndex === 0 ||
+                groupedMessages[groupIndex - 1].sender.username !==
+                  group.sender.username
+              "
+              class="text-zinc-800 flex bg-slate-200 w-9 h-9 rounded-full items-center justify-center mr-2 flex-shrink-0"
+            >
+              <div
+                v-if="group.sender.displayName"
+                class="uppercase font-semibold"
+              >
+                {{ group.sender.displayName[0] }}
+              </div>
+            </div>
+            <!-- Empty spacer when avatar is hidden -->
+            <div v-else class="w-9 h-9 mr-2 flex-shrink-0"></div>
+
+            <div class="min-w-0 break-words w-full">
+              <!-- Only show sender info for first message in group -->
               <div
                 v-if="
-                  msg.sender.username !== currentUser.username &&
-                  shouldShowAvatar(index)
+                  groupIndex === 0 ||
+                  groupedMessages[groupIndex - 1].sender.username !==
+                    group.sender.username
                 "
-                class="text-zinc-800 flex bg-slate-200 w-9 h-9 rounded-full items-center justify-center mr-2"
+                class="flex items-center min-w-0 w-full"
               >
-                <div
-                  v-if="msg.sender.displayName"
-                  class="uppercase font-semibold"
-                >
-                  {{ msg.sender.displayName[0] }}
+                <div class="flex text-left items-center font-semibold">
+                  <div v-if="group.sender.displayName">
+                    {{ group.sender.displayName }}
+                  </div>
+                  <div v-else>
+                    {{ group.sender.firstName }} {{ group.sender.lastName }}
+                  </div>
                 </div>
-                <div v-else class="uppercase font-semibold">
-                  {{ msg.sender.firstName[0] }}{{ msg.sender.lastName[0] }}
+                <div class="pl-2 text-xs text-zinc-400">
+                  {{ formatTimestamp(group.messages[0].timestamp) }}
                 </div>
               </div>
-              <div v-else class="w-9 h-9 mr-2"></div>
+
               <div
-                :class="[
-                  'p-3 rounded-lg shadow max-w-xl break-words',
-                  msg.sender.username === currentUser.username
-                    ? 'bg-zinc-950 text-zinc-200 text-right'
-                    : 'bg-slate-200 text-zinc-800 text-left',
-                ]"
+                v-for="(msg, msgIndex) in group.messages"
+                :key="msg.id"
+                :ref="setMessageRef(msg.id)"
+                class="pt-2 text-left whitespace-pre-wrap break-words"
               >
-                <div class="flex items-center">
-                  <div class="text-left font-semibold">
-                    <div v-if="msg.sender.displayName">
-                      {{ msg.sender.displayName }}
-                    </div>
-                    <div v-else>
-                      {{ msg.sender.firstName }} {{ msg.sender.lastName }}
-                    </div>
-                  </div>
-                  <div class="pl-2 text-xs text-zinc-400">
-                    {{ formatTimestamp(msg.timestamp) }}
-                  </div>
+                <div class="pt-2 text-left whitespace-pre-wrap break-words">
+                  {{ msg.content }}
                 </div>
                 <div v-if="msg.mediaUrl" class="mt-2">
                   <DashPlayer
@@ -196,29 +206,7 @@
                     <LoaderCircle class="w-8 h-8 animate-spin"></LoaderCircle>
                   </div>
                 </div>
-                <div class="pt-1 text-left whitespace-pre-wrap">
-                  {{ msg.content }}
-                </div>
               </div>
-
-              <div
-                v-if="
-                  msg.sender.username === currentUser.username &&
-                  shouldShowAvatar(index)
-                "
-                class="ml-2 text-zinc-800 flex bg-slate-200 w-9 h-9 rounded-full items-center justify-center"
-              >
-                <div
-                  v-if="msg.sender.displayName"
-                  class="uppercase font-semibold"
-                >
-                  {{ msg.sender.displayName[0] }}
-                </div>
-                <div v-else class="uppercase font-semibold">
-                  {{ msg.sender.firstName[0] }}{{ msg.sender.lastName[0] }}
-                </div>
-              </div>
-              <div v-else class="w-9 h-9 ml-2"></div>
             </div>
           </div>
         </div>
@@ -349,10 +337,10 @@
           {{ selectedUser.email }}
         </div>
       </div>
-      <div v-if="currentUser.bio" class="flex flex-col pt-2">
+      <div v-if="selectedUser.bio" class="flex flex-col pt-2">
         <textarea
           disabled
-          v-model="currentUser.bio"
+          v-model="selectedUser.bio"
           class="resize-none flex-1 p-3 text-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
         ></textarea>
       </div>
@@ -362,7 +350,7 @@
 
 <script setup>
 import { uploadFiles, fetchImageBlob } from "@/utils/api";
-import { ref, watch, nextTick } from "vue";
+import { ref, watch, nextTick, computed } from "vue";
 import DashPlayer from "./DashPlayer.vue";
 import { BACKEND_URL } from "@/main";
 import { useParticipants } from "@/utils/useParticipants";
@@ -397,9 +385,36 @@ const visibleMessageIds = ref(new Set());
 const hasScrolled = ref(false);
 
 function onClickParticipant(participant) {
+  if (participant.user.username === props.currentUser.username) return;
   selectedUser.value = participant.user;
   isUserDialogOpen.value = true;
 }
+
+const groupedMessages = computed(() => {
+  if (!props.messages.length) return [];
+
+  const groups = [];
+  let currentGroup = {
+    sender: props.messages[0].sender,
+    messages: [props.messages[0]],
+  };
+
+  for (let i = 1; i < props.messages.length; i++) {
+    const msg = props.messages[i];
+    if (msg.sender.username === currentGroup.sender.username) {
+      currentGroup.messages.push(msg);
+    } else {
+      groups.push(currentGroup);
+      currentGroup = {
+        sender: msg.sender,
+        messages: [msg],
+      };
+    }
+  }
+
+  groups.push(currentGroup);
+  return groups;
+});
 
 const observer = new IntersectionObserver(
   async (entries) => {
