@@ -179,7 +179,7 @@
                     "
                     :src="imageBlobs.get(msg.mediaUrl)"
                     alt="Attached Image"
-                    class="w-[300px] aspect-[3/2] object-contain rounded"
+                    style="max-width: 300px"
                   />
                   <div
                     v-else-if="
