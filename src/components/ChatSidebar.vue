@@ -30,7 +30,7 @@
         <span>CHANNELS</span>
         <Plus
           @click="handleCreateRoom"
-          class="cursor-pointer hover:bg-zinc-100 rounded-md text-zinc-950 w-5 h-5"
+          class="cursor-pointer hover:bg-zinc-200 rounded-md text-zinc-950 w-5 h-5"
         />
       </div>
 

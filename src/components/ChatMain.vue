@@ -42,6 +42,7 @@
               v-for="participant in participants"
               :key="participant.id"
               class="pl-2 py-2 hover:bg-gray-100 cursor-pointer truncate rounded-md flex items-center text-md"
+              @click="onClickParticipant(participant)"
             >
               <div class="flex items-center">
                 <div
@@ -66,12 +67,27 @@
                     "
                   ></div>
                 </div>
-                <div v-if="participant.user.displayName">
+                <div
+                  v-if="participant.user.displayName"
+                  class="flex items-center"
+                >
                   {{ participant.user.displayName }}
+                  <div
+                    v-if="participant.user.username === currentUser.username"
+                    class="pl-2"
+                  >
+                    (You)
+                  </div>
                 </div>
-                <div v-else>
+                <div v-else class="flex items-center">
                   {{ participant.user.firstName }}
                   {{ participant.user.lastName }}
+                  <div
+                    v-if="participant.user.username === currentUser.username"
+                    class="pl-2"
+                  >
+                    (You)
+                  </div>
                 </div>
               </div>
             </li>
@@ -301,6 +317,49 @@
       </button>
     </div>
   </main>
+  <BaseDialog v-model="isUserDialogOpen">
+    <template #header>
+      <div class="flex">User Info</div>
+    </template>
+
+    <div class="flex flex-col gap-2">
+      <div>
+        <div class="flex items-center align-center">
+          <div
+            class="relative flex ml-2 mt-2 text-zinc-800 flex bg-slate-200 w-10 h-10 rounded-full items-center justify-center"
+          >
+            <div class="text-lg uppercase flex">
+              {{ selectedUser.firstName[0] }}{{ selectedUser.lastName[0] }}
+            </div>
+            <div
+              class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white"
+              :class="
+                isUserOnline(selectedUser.lastHeartbeat)
+                  ? 'bg-green-500'
+                  : 'bg-gray-400'
+              "
+            ></div>
+          </div>
+          <div class="pl-2 text-lg flex">
+            {{ selectedUser.firstName }} {{ selectedUser.lastName }}
+            <div v-if="selectedUser.displayName" class="pl-2">
+              ({{ selectedUser.displayName }})
+            </div>
+          </div>
+        </div>
+        <div class="pl-2 text-md pt-4 text-zinc-500">
+          {{ selectedUser.email }}
+        </div>
+      </div>
+      <div class="flex flex-col pt-2">
+        <textarea
+          disabled
+          v-model="currentUser.bio"
+          class="resize-none flex-1 p-3 text-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
+        ></textarea>
+      </div>
+    </div>
+  </BaseDialog>
 </template>
 
 <script setup>
@@ -309,6 +368,7 @@ import { ref, watch, nextTick } from "vue";
 import DashPlayer from "./DashPlayer.vue";
 import { BACKEND_URL } from "@/main";
 import { useParticipants } from "@/utils/useParticipants";
+import BaseDialog from "./Dialog.vue";
 
 const props = defineProps({
   selectedRoom: Object,
@@ -320,6 +380,8 @@ const props = defineProps({
 
 const { participants } = useParticipants(props.selectedRoom.id);
 
+const isUserDialogOpen = ref(false);
+const selectedUser = ref({});
 const messagesContainer = ref(null);
 const textAreaRef = ref(null);
 const op = ref(null);
@@ -334,6 +396,11 @@ const messageRefs = ref(new Map());
 const scrollToMessageId = ref(null);
 
 const visibleMessageIds = ref(new Set());
+
+function onClickParticipant(participant) {
+  selectedUser.value = participant.user;
+  isUserDialogOpen.value = true;
+}
 
 const observer = new IntersectionObserver(
   async (entries) => {

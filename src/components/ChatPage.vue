@@ -22,6 +22,16 @@
       @fetch-more-messages="fetchMoreMessages"
     />
 
+    <div
+      v-else
+      class="flex-1 flex items-center justify-center text-sm text-gray-500"
+    >
+      <div class="flex flex-col items-center">
+        <CloudMoon class="mb-4 w-8 h-8"></CloudMoon>
+        Can you hear the crickets?
+      </div>
+    </div>
+
     <BaseDialog
       v-model="createRoomDialogOpen"
       :closeOnEscape="true"
@@ -164,6 +174,7 @@ import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { BACKEND_URL, FE_URL } from "@/main";
 import { useRoute, useRouter } from "vue-router";
+import { CloudMoon } from "lucide-vue-next";
 
 const route = useRoute();
 const router = useRouter();

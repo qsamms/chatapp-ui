@@ -17,6 +17,7 @@ import Avatar from "primevue/avatar";
 import FileUpload from "primevue/fileupload";
 
 import {
+  CloudMoon,
   EyeOff,
   ImageOff,
   LoaderCircle,
@@ -41,6 +42,7 @@ import { Copy } from "lucide-vue-next";
 import { LogOut } from "lucide-vue-next";
 import { Paperclip } from "lucide-vue-next";
 import { File } from "lucide-vue-next";
+import { Ghost } from "lucide-vue-next";
 
 import "./index.css";
 
@@ -149,3 +151,5 @@ app.component("Paperclip", Paperclip);
 app.component("File", File);
 app.component("ImageOff", ImageOff);
 app.component("MessagesSquare", MessagesSquare);
+app.component("Ghost", Ghost);
+app.component("CloudMoon", CloudMoon);
