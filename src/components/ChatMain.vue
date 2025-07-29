@@ -128,6 +128,9 @@
               >
                 {{ group.sender.displayName[0] }}
               </div>
+              <div v-else class="uppercase font-semibold">
+                {{ group.sender.firstName[0] }}{{ group.sender.lastName[0] }}
+              </div>
             </div>
             <!-- Empty spacer when avatar is hidden -->
             <div v-else class="w-9 h-9 mr-2 flex-shrink-0"></div>
