@@ -171,18 +171,33 @@
                     "
                     :src="`${BACKEND_URL}/${msg.mediaUrl}`"
                   />
-                  <img
-                    v-else-if="
-                      isImage(msg.mediaUrl) &&
-                      imageBlobs.get(msg.mediaUrl) &&
-                      visibleMessageIds.has(msg.id)
-                    "
-                    :src="imageBlobs.get(msg.mediaUrl)"
-                    alt="Attached Image"
-                    style="max-width: 300px"
-                  />
                   <div
-                    v-else-if="
+                    class="relative"
+                    @mouseenter="hoveredImageId = msg.id"
+                    @mouseleave="hoveredImageId = null"
+                  >
+                    <img
+                      v-if="
+                        isImage(msg.mediaUrl) &&
+                        imageBlobs.get(msg.mediaUrl) &&
+                        visibleMessageIds.has(msg.id)
+                      "
+                      :src="imageBlobs.get(msg.mediaUrl)"
+                      alt="Attached Image"
+                      class="rounded max-w-[300px] transition-all duration-200"
+                      :class="{ 'brightness-75': hoveredImageId === msg.id }"
+                      @click="openImageEnlarged(imageBlobs.get(msg.mediaUrl))"
+                    />
+                    <div
+                      v-if="hoveredImageId === msg.id"
+                      class="absolute inset-0 flex items-center justify-center max-w-[300px] cursor-pointer"
+                      @click="openImageEnlarged(imageBlobs.get(msg.mediaUrl))"
+                    >
+                      <ZoomIn class="w-8 h-8 text-white opacity-90" />
+                    </div>
+                  </div>
+                  <div
+                    v-if="
                       isImage(msg.mediaUrl) &&
                       !imageBlobs.has(msg.mediaUrl) &&
                       visibleMessageIds.has(msg.id) &&
@@ -200,7 +215,12 @@
                     </div>
                   </div>
                   <div
-                    v-else
+                    v-if="
+                      isImage(msg.mediaUrl) &&
+                      !imageBlobs.has(msg.mediaUrl) &&
+                      visibleMessageIds.has(msg.id) &&
+                      !failedImageUrls.has(msg.id)
+                    "
                     class="w-[300px] aspect-[3/2] flex items-center justify-center rounded"
                   >
                     <LoaderCircle class="w-8 h-8 animate-spin"></LoaderCircle>
@@ -346,6 +366,29 @@
       </div>
     </div>
   </BaseDialog>
+
+  <transition name="fade">
+    <div
+      v-if="enlargedImage"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
+      @click="closeImageEnlarged"
+    >
+      <div class="relative max-w-4xl max-h-screen p-4">
+        <button
+          @click.stop="closeImageEnlarged"
+          class="absolute top-4 right-4 text-white hover:text-gray-300 z-50"
+        >
+          <X class="w-6 h-6" />
+        </button>
+        <img
+          :src="enlargedImage"
+          alt="Enlarged image"
+          class="max-w-full max-h-[90vh] object-contain"
+          @click.stop
+        />
+      </div>
+    </div>
+  </transition>
 </template>
 
 <script setup>
@@ -383,6 +426,17 @@ const scrollToMessageId = ref(null);
 
 const visibleMessageIds = ref(new Set());
 const hasScrolled = ref(false);
+
+const enlargedImage = ref(null);
+const hoveredImageId = ref(null);
+
+function openImageEnlarged(imageUrl) {
+  enlargedImage.value = imageUrl;
+}
+
+function closeImageEnlarged() {
+  enlargedImage.value = null;
+}
 
 function onClickParticipant(participant) {
   if (participant.user.username === props.currentUser.username) return;
@@ -703,3 +757,32 @@ const onScroll = () => {
   }
 };
 </script>
+
+<style>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.relative {
+  position: relative;
+  display: inline-block;
+}
+
+.absolute {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 0.25rem; /* Match your image rounding */
+}
+</style>

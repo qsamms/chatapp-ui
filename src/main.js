@@ -24,6 +24,7 @@ import {
   MessageCircle,
   User,
   Users,
+  ZoomIn,
 } from "lucide-vue-next";
 import { MessageSquarePlus } from "lucide-vue-next";
 import { MessagesSquare } from "lucide-vue-next";
@@ -153,3 +154,4 @@ app.component("ImageOff", ImageOff);
 app.component("MessagesSquare", MessagesSquare);
 app.component("Ghost", Ghost);
 app.component("CloudMoon", CloudMoon);
+app.component("ZoomIn", ZoomIn);
