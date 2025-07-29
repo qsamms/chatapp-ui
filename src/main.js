@@ -44,6 +44,7 @@ import { LogOut } from "lucide-vue-next";
 import { Paperclip } from "lucide-vue-next";
 import { File } from "lucide-vue-next";
 import { Ghost } from "lucide-vue-next";
+import { ChevronLeft, ChevronRight } from "lucide-vue-next";
 
 import "./index.css";
 
@@ -155,3 +156,5 @@ app.component("MessagesSquare", MessagesSquare);
 app.component("Ghost", Ghost);
 app.component("CloudMoon", CloudMoon);
 app.component("ZoomIn", ZoomIn);
+app.component("ChevronLeft", ChevronLeft);
+app.component("ChevronRight", ChevronRight);
