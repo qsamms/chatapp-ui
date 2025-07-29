@@ -3,7 +3,7 @@
     <video
       ref="videoEl"
       controls
-      width="350"
+      width="300"
       class="max-w-full h-auto rounded"
     ></video>
   </div>

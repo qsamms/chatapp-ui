@@ -1,7 +1,6 @@
 <template>
   <main class="w-full flex-1 pt-4 flex flex-col overflow-hidden">
     <h3
-      v-if="selectedRoom"
       class="w-full flex items-center justify-between text-lg text-zinc-950 font-semibold text-left border-b-2 border-zinc-300 pb-4 pl-4"
     >
       <div class="flex items-center">
@@ -170,25 +169,19 @@
                     "
                     :src="imageBlobs.get(msg.mediaUrl)"
                     alt="Attached Image"
-                    style="
-                      max-width: 300px;
-                      max-height: 300px;
-                      min-width: 300px;
-                      max-width: 300px;
-                    "
-                    class="max-w-full h-auto rounded"
+                    class="w-[300px] aspect-[3/2] object-contain rounded"
                   />
                   <div
                     v-else-if="
                       isImage(msg.mediaUrl) &&
                       !imageBlobs.has(msg.mediaUrl) &&
-                      visibleMessageIds.has(msg.id)
+                      visibleMessageIds.has(msg.id) &&
+                      failedImageUrls.has(msg.id)
                     "
-                    style="width: 300px; height: 200px"
                     :class="
                       msg.sender.username !== currentUser.username
-                        ? 'flex flex-col items-center justify-center border-2 border-dashed border-zinc-950 rounded-md'
-                        : 'flex flex-col items-center justify-center border-2 border-dashed text-zinc-200 rounded-md'
+                        ? 'flex flex-col items-center justify-center border-2 border-dashed border-zinc-950 rounded-md w-[300px] aspect-[3/2] object-contain'
+                        : 'flex flex-col items-center justify-center border-2 border-dashed text-zinc-200 rounded-md w-[300px] aspect-[3/2] object-contain'
                     "
                   >
                     <div class="p-4 flex flex-col items-center">
@@ -196,7 +189,12 @@
                       <div>Failed to load image</div>
                     </div>
                   </div>
-                  <div v-else style="width: 300px; height: 200px"></div>
+                  <div
+                    v-else
+                    class="w-[300px] aspect-[3/2] flex items-center justify-center rounded"
+                  >
+                    <LoaderCircle class="w-8 h-8 animate-spin"></LoaderCircle>
+                  </div>
                 </div>
                 <div class="pt-1 text-left whitespace-pre-wrap">
                   {{ msg.content }}
@@ -512,7 +510,7 @@ function scrollToBottom(el) {
 
 watch(
   () => props.messages,
-  async () => {
+  async (newMessages, oldMessages) => {
     await nextTick();
 
     const el = messagesContainer.value;
@@ -526,6 +524,11 @@ watch(
       if (!hasScrolled.value) {
         scrollToBottom(el);
         hasScrolled.value = true;
+      }
+      if (newMessages.length - oldMessages.length == 1) {
+        const msg = newMessages[newMessages.length - 1];
+        if (msg.sender.username === props.currentUser.username)
+          scrollToBottom(el);
       }
     }
   }
