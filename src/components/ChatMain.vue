@@ -346,7 +346,7 @@
           </div>
           <div class="pl-2 text-lg flex flex-col pt-1">
             {{ selectedUser.user.firstName }} {{ selectedUser.user.lastName }}
-            <div v-if="selectedUser.user.displayName" class="pl-2 text-xs">
+            <div v-if="selectedUser.user.displayName" class="text-xs">
               ({{ selectedUser.user.displayName }})
             </div>
           </div>
