@@ -162,7 +162,6 @@
                     "
                     :src="`${BACKEND_URL}/${msg.mediaUrl}`"
                   />
-
                   <img
                     v-else-if="
                       isImage(msg.mediaUrl) &&
@@ -197,6 +196,7 @@
                       <div>Failed to load image</div>
                     </div>
                   </div>
+                  <div v-else style="width: 300px; height: 200px"></div>
                 </div>
                 <div class="pt-1 text-left whitespace-pre-wrap">
                   {{ msg.content }}
@@ -351,7 +351,7 @@
           {{ selectedUser.email }}
         </div>
       </div>
-      <div class="flex flex-col pt-2">
+      <div v-if="currentUser.bio" class="flex flex-col pt-2">
         <textarea
           disabled
           v-model="currentUser.bio"
@@ -396,6 +396,7 @@ const messageRefs = ref(new Map());
 const scrollToMessageId = ref(null);
 
 const visibleMessageIds = ref(new Set());
+const hasScrolled = ref(false);
 
 function onClickParticipant(participant) {
   selectedUser.value = participant.user;
@@ -521,7 +522,11 @@ watch(
       scrollToMessage(scrollToMessageId.value);
       scrollToMessageId.value = null;
     } else {
-      scrollToBottom(el);
+      const el = messagesContainer.value;
+      if (!hasScrolled.value) {
+        scrollToBottom(el);
+        hasScrolled.value = true;
+      }
     }
   }
 );
@@ -529,6 +534,7 @@ watch(
 watch(
   () => props.selectedRoom,
   async (oldRoom, newRoom) => {
+    hasScrolled.value = false;
     if (oldRoom !== newRoom) {
       for (const [mediaUrl, blobUrl] in imageBlobs.value.entries()) {
         URL.revokeObjectURL(blobUrl);

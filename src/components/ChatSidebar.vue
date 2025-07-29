@@ -2,13 +2,7 @@
   <aside
     class="w-80 border-r border-zinc-300 flex flex-col justify-between bg-gray-100"
   >
-    <div v-if="loadingRooms" class="text-sm text-zinc-950 p-2">
-      Loading rooms...
-    </div>
-    <div v-if="error" class="text-sm text-red-500 p-2">{{ error }}</div>
-
     <div
-      v-if="acceptedChatRooms.length"
       class="text-sm w-full text-zinc-950 border-zinc-300 border-b-2 pl-4 pb-4 pt-4 pr-2"
     >
       <div class="flex justify-between items-center w-full">
