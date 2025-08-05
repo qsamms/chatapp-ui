@@ -13,7 +13,9 @@
         class="relative inline-block"
         @click="toggleMembers"
       >
-        <div class="flex mr-4 hover:bg-gray-200 rounded-lg p-2">
+        <div
+          class="flex mr-4 hover:bg-gray-200 hover:cursor-pointer rounded-lg p-2"
+        >
           <div class="pr-2">
             {{ participants.length }}
           </div>
