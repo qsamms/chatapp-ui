@@ -248,7 +248,7 @@
 
     <div
       v-if="files && files.length > 0"
-      class="w-full mt-4 flex flex-col justify-center px-2 pt-2 border-t-2 border-zinc-300"
+      class="w-full flex flex-col justify-center px-2 pt-2 border-t-2 border-zinc-300"
     >
       <div class="flex items-center text-zinc-700">
         <Paperclip class="w-6 h-6 pr-2" />
@@ -282,7 +282,7 @@
 
     <div
       v-if="selectedRoom && !loadingMessages"
-      class="w-full mt-4 flex items-center pl-2 pr-2 pt-4 pb-4 border-t-2 border-zinc-300"
+      class="w-full flex items-center pl-2 pr-2 pt-4 pb-4 border-t-2 border-zinc-300"
     >
       <input
         type="file"
