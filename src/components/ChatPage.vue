@@ -242,6 +242,11 @@ async function fetchChatRooms() {
           roomToSelect = room;
         }
       });
+      dms.value.forEach((room) => {
+        if (room.id === roomId) {
+          roomToSelect = room;
+        }
+      });
       if (roomToSelect) selectRoom(roomToSelect);
       return;
     }
