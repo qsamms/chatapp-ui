@@ -3,9 +3,11 @@
     <ChatSidebar
       :loadingRooms="loadingRooms"
       :acceptedChatRooms="acceptedChatRooms"
+      :dms="dms"
       :selectedRoom="selectedRoom"
       :error="error"
       :settingsDialogOpen="settingsDialogOpen"
+      :loadingMessages="loadingMessages"
       @open-create-room="createRoomDialogOpen = true"
       @select-room="selectRoom"
       @invite-room="handleClickInvite"
@@ -20,6 +22,7 @@
       :isFetchingMore="isFetchingMore"
       @send-message="sendMessage"
       @fetch-more-messages="fetchMoreMessages"
+      @select-temp-dm-room="selectTempDmRoom"
     />
 
     <div
@@ -187,7 +190,7 @@ const isFetchingMore = ref(false);
 
 const loadingRooms = ref(false);
 const acceptedChatRooms = ref([]);
-const invitedChatRooms = ref([]);
+const dms = ref([]);
 const selectedRoom = ref(null);
 
 const loadingMessages = ref(false);
@@ -230,8 +233,8 @@ async function fetchChatRooms() {
   loadingRooms.value = true;
   try {
     const res = await getChatRooms();
-    acceptedChatRooms.value = res.data.accepted;
-    invitedChatRooms.value = res.data.invited;
+    acceptedChatRooms.value = res.data.accepted.filter((room) => !room.dm);
+    dms.value = res.data.accepted.filter((room) => room.dm);
     if (roomId) {
       let roomToSelect = null;
       acceptedChatRooms.value.forEach((room) => {
@@ -250,6 +253,24 @@ async function fetchChatRooms() {
   } finally {
     loadingRooms.value = false;
   }
+}
+
+async function selectTempDmRoom(targetUser) {
+  for (const dm of dms.value) {
+    if (dm.otherParticipant.username === targetUser.username) {
+      selectRoom(dm);
+      return;
+    }
+  }
+  selectRoom(
+    {
+      id: "",
+      dm: true,
+      isTempDm: true,
+      otherParticipant: targetUser,
+    },
+    targetUser.username
+  );
 }
 
 async function fetchMoreMessages() {
@@ -279,17 +300,17 @@ async function fetchMessages() {
   }
 }
 
-async function selectRoom(room) {
+async function selectRoom(room, targetUser = null) {
   if (room.id === selectedRoom.value?.id) return;
   router.push(`/chat/${room.id}`);
   selectedRoom.value = room;
   messages.value = [];
   moreMessages.value = true;
-  fetchMessages();
-  await initWSConnection();
+  if (!targetUser) fetchMessages();
+  await initWSConnection(targetUser);
 }
 
-async function initWSConnection() {
+async function initWSConnection(targetUser = null) {
   if (client) await client.deactivate({ force: true });
   client = new Client({
     webSocketFactory: () =>
@@ -299,15 +320,17 @@ async function initWSConnection() {
         )}`
       ),
     onConnect: function (frame) {
-      client.subscribe(
-        `/topic/chatroom/${selectedRoom.value.id}/`,
-        (message) => {
-          const messageBody = JSON.parse(message.body);
-          if (message.body) {
-            messages.value = [...messages.value, messageBody];
+      if (!targetUser) {
+        client.subscribe(
+          `/topic/chatroom/${selectedRoom.value.id}/`,
+          (message) => {
+            const messageBody = JSON.parse(message.body);
+            if (message.body) {
+              messages.value = [...messages.value, messageBody];
+            }
           }
-        }
-      );
+        );
+      }
     },
     debug: (str) => {
       console.log("STOMP DEBUG:", str);
@@ -319,10 +342,13 @@ async function initWSConnection() {
   client.activate();
 }
 
-function sendMessage(message) {
+function sendMessage({ message, targetUser = null }) {
+  const destination = !targetUser
+    ? `/app/chatroom/${selectedRoom.value.id}/send/`
+    : `/app/dm/${targetUser.username}/send/`;
   if (client && client.connected) {
     client.publish({
-      destination: `/app/chatroom/${selectedRoom.value.id}/send/`,
+      destination,
       body: JSON.stringify(message),
       headers: { "content-type": "application/json" },
     });

@@ -84,6 +84,55 @@
             </tbody>
           </table>
         </div>
+
+        <div
+          class="flex justify-between text-md text-zinc-950 pt-4 pl-4 pr-2 font-semibold"
+        >
+          <span>DIRECT MESSAGES</span>
+          <Plus
+            @click="handleCreateRoom"
+            class="cursor-pointer hover:bg-zinc-200 rounded-md text-zinc-950 w-5 h-5"
+          />
+        </div>
+
+        <div class="overflow-y-auto">
+          <table
+            v-if="dms.length"
+            class="w-full mb-4 pl-2 pr-2"
+            style="border-collapse: separate; border-spacing: 0 0.5rem"
+          >
+            <tbody>
+              <tr
+                v-for="room in dms"
+                :key="room.id"
+                class="group"
+                @click="handleRoomClick(room)"
+              >
+                <td
+                  :class="[
+                    'p-2 flex justify-between items-center cursor-pointer min-h-8 rounded-lg',
+                    selectedRoom?.id === room.id
+                      ? 'bg-zinc-950 text-white'
+                      : 'hover:bg-zinc-200 text-zinc-600',
+                  ]"
+                >
+                  <div class="flex items-center text-base">
+                    <User class="pr-2"></User>
+                    <div class="flex items-center">
+                      <div v-if="room.otherParticipant.displayName">
+                        {{ room.otherParticipant.displayName }}
+                      </div>
+                      <div v-else>
+                        {{ room.otherParticipant.firstName }}
+                        {{ room.otherParticipant.lastName }}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
       <div
         v-if="!isCollapsed"
@@ -142,6 +191,7 @@ import { useHeartbeat } from "@/utils/useHeartbeat";
 const props = defineProps([
   "loadingRooms",
   "acceptedChatRooms",
+  "dms",
   "selectedRoom",
   "error",
 ]);

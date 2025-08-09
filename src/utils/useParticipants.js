@@ -1,13 +1,14 @@
 import { onMounted, onBeforeUnmount, ref, watch } from "vue";
 import { getParticipants } from "./api";
 
-export function useParticipants(roomIdGetter, intervalMs = 5000) {
+export function useParticipants(roomGetter, intervalMs = 5000) {
   let interval = null;
 
   const participants = ref([]);
 
   async function fetchParticipants() {
-    const response = await getParticipants(roomIdGetter());
+    if (roomGetter().dm && roomGetter().isTempDm) return;
+    const response = await getParticipants(roomGetter().id);
     participants.value = response.data;
   }
 
@@ -23,7 +24,7 @@ export function useParticipants(roomIdGetter, intervalMs = 5000) {
   });
 
   watch(
-    roomIdGetter,
+    roomGetter,
     () => {
       fetchParticipants();
     },

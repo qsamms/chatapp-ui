@@ -3,19 +3,30 @@
     <h3
       class="w-full flex items-center justify-between text-lg text-zinc-950 font-semibold text-left border-b-2 border-zinc-300 pb-4 pl-4"
     >
-      <div class="flex items-center">
+      <div v-if="selectedRoom && !selectedRoom.dm" class="flex items-center">
         <Hash class="w-6 h-6 bg-slate-200 rounded-md p-1 mr-2"></Hash>
         {{ selectedRoom.name }}
       </div>
+      <div
+        v-else-if="selectedRoom && selectedRoom.dm"
+        class="flex items-center"
+      >
+        <User class="w-6 h-6 bg-slate-200 rounded-md p-1 mr-2"></User>
+        <div v-if="selectedRoom.otherParticipant.displayName">
+          {{ selectedRoom.otherParticipant.displayName }}
+        </div>
+        <div v-else>
+          {{ selectedRoom.otherParticipant.firstName }}
+          {{ selectedRoom.otherParticipant.lastName }}
+        </div>
+      </div>
 
       <div
-        v-if="participants.length"
+        v-if="participants.length && !selectedRoom.dm"
         class="relative inline-block"
         @click="toggleMembers"
       >
-        <div
-          class="flex mr-4 hover:bg-gray-200 hover:cursor-pointer rounded-lg p-2"
-        >
+        <div class="flex mr-4 hover:cursor-pointer rounded-lg pr-2">
           <div class="pr-2">
             {{ participants.length }}
           </div>
@@ -236,9 +247,13 @@
       v-if="selectedRoom && !loadingMessages && !messages.length"
       class="flex-1 flex items-center justify-center text-sm text-gray-500"
     >
-      <div class="flex flex-col items-center">
+      <div v-if="!selectedRoom.dm" class="flex flex-col items-center">
         <MessagesSquare class="mb-4 w-8 h-8"></MessagesSquare>
         Nothing yet, break the ice?
+      </div>
+      <div v-else class="flex flex-col items-center">
+        <MessagesSquare class="mb-4 w-8 h-8"></MessagesSquare>
+        Send a message to start a DM
       </div>
     </div>
 
@@ -371,6 +386,7 @@
       </div>
       <div class="flex gap-2">
         <button
+          @click="clickSendDm(selectedUser.user)"
           class="text-sm flex w-full justify-center items-center text-zinc-950 mt-4 bg-slate-200 text-white py-1 px-4 rounded-md hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 transition duration-150 ease-in-out"
         >
           <MessageCircle class="w-4 h-4 mr-2"></MessageCircle>Direct Message
@@ -422,9 +438,10 @@ const props = defineProps({
   currentUser: Object,
   moreMessages: Boolean,
   isFetchingMore: Boolean,
+  loadingMessages: Boolean,
 });
 
-const { participants } = useParticipants(() => props.selectedRoom.id);
+const { participants } = useParticipants(() => props.selectedRoom);
 
 const isUserDialogOpen = ref(false);
 const selectedUser = ref({});
@@ -446,6 +463,18 @@ const hasScrolled = ref(false);
 
 const enlargedImage = ref(null);
 const hoveredImageId = ref(null);
+
+function clickSendDm(selectedUser) {
+  closeMembersPopover();
+  isUserDialogOpen.value = false;
+  emit("select-temp-dm-room", selectedUser);
+}
+
+function closeMembersPopover() {
+  if (op.value) {
+    op.value.hide();
+  }
+}
 
 function openImageEnlarged(imageUrl) {
   enlargedImage.value = imageUrl;
@@ -708,7 +737,11 @@ function triggerFileInput() {
   fileInput.value.click();
 }
 
-const emit = defineEmits(["send-message", "fetch-more-messages"]);
+const emit = defineEmits([
+  "send-message",
+  "fetch-more-messages",
+  "select-temp-dm-room",
+]);
 const newMessage = ref("");
 
 function onEnter(event) {
@@ -741,7 +774,20 @@ async function sendMessage() {
       return;
     }
   }
-  emit("send-message", { content: newMessage.value, mediaUrl: mediaUrl });
+  if (props.selectedRoom.dm) {
+    const targetUser = props.selectedRoom
+      ? props.selectedRoom.otherParticipant
+      : null;
+    emit("send-message", {
+      message: { content: newMessage.value, mediaUrl: mediaUrl },
+      targetUser,
+    });
+  } else {
+    emit("send-message", {
+      message: { content: newMessage.value, mediaUrl: mediaUrl },
+      targetUser: null,
+    });
+  }
   newMessage.value = "";
   files.value = [];
   isSending.value = false;
