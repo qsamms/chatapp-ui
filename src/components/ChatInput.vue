@@ -35,7 +35,7 @@
 
   <div
     v-if="selectedRoom && !loadingMessages"
-    class="w-full flex items-center pl-2 pr-2 pt-4 pb-4 border-t-2 border-zinc-300"
+    class="w-full flex items-center p-2 border-t-2 border-zinc-300"
   >
     <input
       type="file"
@@ -45,21 +45,13 @@
       accept="image/*, video/*"
       :multiple="false"
     />
-    <button
-      @click="triggerFileInput"
-      class="flex items-center justify-center h-12 w-12 mr-2 rounded-lg hover:bg-zinc-950 hover:text-white transition-colors duration-200"
-      title="Attach File"
-    >
-      <Paperclip class="w-6 h-6"></Paperclip>
-    </button>
-
     <div class="relative flex-1">
       <QuillEditor
         v-model:content="newMessage"
         ref="editorRef"
         theme="snow"
         contentType="html"
-        :placeholder="selectedRoom.name"
+        :placeholder="getRoomName(selectedRoom)"
         :toolbar="[
           ['bold', 'italic', 'underline', 'strike'],
           [{ list: 'ordered' }, { list: 'bullet' }],
@@ -101,6 +93,18 @@ const files = ref([]);
 const editorRef = ref(null);
 const fileInput = ref(null);
 
+function getRoomName(room) {
+  if (room.dm) {
+    if (room.otherParticipant.displayName) {
+      return `Message ${room.otherParticipant.displayName} ...`;
+    } else {
+      return `Message ${room.otherParticipant.firstName} ${room.otherParticipant.lastName} ...`;
+    }
+  } else {
+    return `Message ${room.name} ...`;
+  }
+}
+
 watch(
   () => props.selectedRoom,
   (newRoom) => {
@@ -111,11 +115,7 @@ watch(
 
     const editorElem = quill.root;
     if (editorElem) {
-      const placeholderText = newRoom
-        ? `Message ${newRoom.name}...`
-        : "Message...";
-
-      editorElem.setAttribute("data-placeholder", placeholderText);
+      editorElem.setAttribute("data-placeholder", getRoomName(newRoom));
     }
   },
   { immediate: true }
@@ -209,7 +209,7 @@ async function sendMessage() {
 }
 
 onMounted(() => {
-  const quill = editorRef.value;
+  let quill = editorRef.value;
   if (!quill) return;
 
   console.log(quill);
@@ -221,8 +221,19 @@ onMounted(() => {
       return false;
     },
   });
-  quill.editor.__quill.options.modules.toolbar.handlers.image =
-    triggerFileInput;
+
+  const quillWrapper = editorRef.value;
+  if (!quillWrapper) return;
+
+  quill = quillWrapper.editor.__quill;
+  if (!quill) return;
+
+  const toolbar = quill.getModule("toolbar");
+  if (!toolbar) return;
+
+  toolbar.handlers.image = () => {
+    triggerFileInput();
+  };
 });
 </script>
 
