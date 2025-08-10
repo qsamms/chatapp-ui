@@ -55,6 +55,7 @@
 
     <div class="relative flex-1">
       <QuillEditor
+        v-model:content="newMessage"
         ref="editorRef"
         theme="snow"
         :content="newMessage"
@@ -203,16 +204,31 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.relative.flex-1 {
+  min-width: 0; /* critical for flex children to wrap/shrink */
+}
+
+::v-deep(.ql-editor) {
+  max-height: 400px;
+  padding-right: 50px;
+  padding-bottom: 50px;
+}
+
 .quill-editor {
+  padding-right: 50px;
   min-height: 130px;
-  padding-bottom: 40px; /* add space so button doesn't overlap text */
+  max-height: 250px;
+  overflow-y: auto;
+  padding-bottom: 40px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Position send button at bottom right inside the editor container */
 .send-button {
   position: absolute;
   bottom: 8px;
-  right: 8px;
+  right: 20px;
   height: 36px;
   width: 36px;
   border-radius: 6px;
