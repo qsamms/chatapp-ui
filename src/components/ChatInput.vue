@@ -52,42 +52,42 @@
     >
       <Paperclip class="w-6 h-6"></Paperclip>
     </button>
-    <div
-      class="scrollbar-hide resize-none flex-1 p-3 text-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
-    >
+
+    <div class="relative flex-1">
       <QuillEditor
         ref="editorRef"
-        @update:content="(val) => (newMessage = val)"
         theme="snow"
         :content="newMessage"
         contentType="html"
         :placeholder="`Message ${selectedRoom.name}...`"
         :toolbar="[
           ['bold', 'italic', 'underline', 'strike'],
-          ['link', 'image'],
+          ['image', 'link'],
           [{ list: 'ordered' }, { list: 'bullet' }],
-          ['code-block'],
+          ['code'],
         ]"
-        :modules="modules"
+        class="quill-editor"
       ></QuillEditor>
+      <button
+        @click="sendMessage"
+        class="send-button"
+        :disabled="isSending"
+        aria-label="Send message"
+      >
+        <LoaderCircle
+          v-if="isSending"
+          class="w-6 h-6 animate-spin"
+        ></LoaderCircle>
+        <Send v-else class="w-6 h-6"></Send>
+      </button>
     </div>
-
-    <button
-      @click="sendMessage"
-      class="flex items-center justify-center h-12 w-12 ml-2 rounded-lg hover:bg-zinc-950 hover:text-white transition-colors duration-200"
-    >
-      <LoaderCircle
-        v-if="isSending"
-        class="w-6 h-6 animate-spin"
-      ></LoaderCircle>
-      <Send v-else class="w-6 h-6"></Send>
-    </button>
   </div>
 </template>
 
 <script setup>
+// your existing script unchanged
 import { uploadFiles } from "@/utils/api";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, defineComponent } from "vue";
 import { QuillEditor } from "@vueup/vue-quill";
 
 const props = defineProps({
@@ -107,6 +107,7 @@ const editorRef = ref(null);
 const fileInput = ref(null);
 
 function triggerFileInput() {
+  console.log("triggered");
   fileInput.value.click();
 }
 
@@ -187,6 +188,8 @@ onMounted(() => {
   const quill = editorRef.value;
   if (!quill) return;
 
+  console.log(quill);
+
   quill.editor.__quill.keyboard.bindings[13].unshift({
     key: 13,
     handler: (range, context) => {
@@ -194,5 +197,42 @@ onMounted(() => {
       return false;
     },
   });
+  quill.editor.__quill.options.modules.toolbar.handlers.image =
+    triggerFileInput;
 });
 </script>
+
+<style scoped>
+.quill-editor {
+  min-height: 130px;
+  padding-bottom: 40px; /* add space so button doesn't overlap text */
+}
+
+/* Position send button at bottom right inside the editor container */
+.send-button {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  height: 36px;
+  width: 36px;
+  border-radius: 6px;
+  border: none;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #18181b; /* zinc-950 */
+  transition: background-color 0.2s;
+}
+
+.send-button:hover:not(:disabled) {
+  background-color: #27272a; /* zinc-800 */
+  color: white;
+}
+
+.send-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+</style>

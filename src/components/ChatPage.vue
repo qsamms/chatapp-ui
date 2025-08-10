@@ -35,11 +35,7 @@
       </div>
     </div>
 
-    <BaseDialog
-      v-model="createRoomDialogOpen"
-      :closeOnEscape="true"
-      :darkBackground="true"
-    >
+    <BaseDialog v-model="createRoomDialogOpen" :closeOnEscape="true">
       <template #header>
         <div class="flex flex-col">
           <div class="text-lg font-semibold flex items-center">
