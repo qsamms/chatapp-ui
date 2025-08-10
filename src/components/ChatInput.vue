@@ -78,7 +78,24 @@
 <script setup>
 import { uploadFiles } from "@/utils/api";
 import { ref, onMounted, watch } from "vue";
-import { QuillEditor } from "@vueup/vue-quill";
+import { QuillEditor, Quill } from "@vueup/vue-quill";
+
+const icons = Quill.import("ui/icons");
+
+const codeBlockSVG = `
+<svg
+  width="24px"
+  height="24px"
+  viewBox="0 0 35 24"
+  xmlns="http://www.w3.org/2000/svg"
+  preserveAspectRatio="xMidYMid meet"
+  style="display: block; margin: auto;"
+>
+  <path d="M20 3H4c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zM4 19V7h16l.002 12H4z"/>
+  <path d="M9.293 9.293 5.586 13l3.707 3.707 1.414-1.414L8.414 13l2.293-2.293zm5.414 0-1.414 1.414L15.586 13l-2.293 2.293 1.414 1.414L18.414 13z"/>
+</svg>
+`;
+icons["code-block"] = codeBlockSVG;
 
 const props = defineProps({
   selectedRoom: Object,
@@ -164,11 +181,21 @@ function clearQuillEditor() {
   const quill = editorRef.value.editor.__quill;
   if (!quill) return;
 
-  quill.root.innerHTML = "<p><br></p>";
+  quill.root.innerHTML = "";
+}
+
+function stripHtml(html) {
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  return div.textContent || div.innerText || "";
 }
 
 async function sendMessage() {
-  if (!newMessage.value.trim() && files.value.length == 0) return;
+  const plainText = stripHtml(newMessage.value).trim();
+
+  if (plainText === "" && files.value.length === 0) {
+    return;
+  }
 
   isSending.value = true;
 
