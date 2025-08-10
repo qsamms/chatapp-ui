@@ -86,7 +86,7 @@ const codeBlockSVG = `
 <svg
   width="24px"
   height="24px"
-  viewBox="0 0 35 24"
+  viewBox="0 0 24 24"
   xmlns="http://www.w3.org/2000/svg"
   preserveAspectRatio="xMidYMid meet"
   style="display: block; margin: auto;"
@@ -280,6 +280,12 @@ onMounted(() => {
   background: transparent;
   border: none;
   margin: 0 4px;
+}
+
+.ql-snow.ql-toolbar button {
+  padding-left: 2px !important ;
+  width: 28px !important;
+  height: 28px !important;
 }
 
 .ql-toolbar .ql-formats button:hover {

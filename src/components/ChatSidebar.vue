@@ -90,7 +90,7 @@
         >
           <span>DIRECT MESSAGES</span>
           <Plus
-            @click="handleCreateRoom"
+            @click="handleCreateDM"
             class="cursor-pointer hover:bg-zinc-200 rounded-md text-zinc-950 w-5 h-5"
           />
         </div>
@@ -201,6 +201,7 @@ const emit = defineEmits([
   "open-create-room",
   "invite-room",
   "settings-clicked",
+  "open-create-dm",
 ]);
 
 useHeartbeat();
@@ -226,6 +227,10 @@ function handleRoomClick(room) {
 
 function handleCreateRoom() {
   emit("open-create-room");
+}
+
+function handleCreateDM() {
+  emit("open-create-dm");
 }
 
 function handleClickInvite(room) {

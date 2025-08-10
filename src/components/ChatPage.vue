@@ -9,6 +9,7 @@
       :settingsDialogOpen="settingsDialogOpen"
       :loadingMessages="loadingMessages"
       @open-create-room="createRoomDialogOpen = true"
+      @open-create-dm="createDMDialogOpen = true"
       @select-room="selectRoom"
       @invite-room="handleClickInvite"
       @settings-clicked="handleClickSettings"
@@ -66,6 +67,14 @@
           </button>
         </div>
       </div>
+    </BaseDialog>
+
+    <BaseDialog v-model="createDMDialogOpen" :closeOnEscape="true">
+      <template #header>
+        <div class="flex">Start a new DM</div>
+      </template>
+
+      <div class="flex flex-col gap-4"></div>
     </BaseDialog>
 
     <BaseDialog
@@ -195,6 +204,7 @@ const error = ref("");
 const moreMessages = ref(true);
 
 const createRoomDialogOpen = ref(false);
+const createDMDialogOpen = ref(false);
 const newRoomName = ref("");
 
 const inviteFriendsDialogOpen = ref(false);
