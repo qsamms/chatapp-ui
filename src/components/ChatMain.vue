@@ -450,37 +450,4 @@ const onScroll = () => {
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 0.25rem; /* Match your image rounding */
 }
-
-.ql-toolbar {
-  display: flex;
-  border: 1px solid #ccc;
-  border-radius: 2px;
-}
-
-.ql-toolbar .ql-formats button {
-  color: #333;
-  background: transparent;
-  border: none;
-  margin: 0 4px;
-}
-
-.ql-toolbar .ql-formats button:hover {
-  background-color: #ddd;
-}
-
-.ql-toolbar .ql-formats .ql-active {
-  background-color: #aaa;
-  color: white;
-}
-
-.ql-editor {
-  overflow-y: hidden; /* hides scrollbar, like scrollbar-hide */
-  resize: none; /* disables manual resize */
-  flex-grow: 1; /* flex-1 */
-  color: #18181b; /* text-zinc-950 */
-  border-radius: 0.5rem; /* rounded-lg (8px) */
-  outline: none;
-  box-shadow: none;
-  min-height: 70px;
-}
 </style>

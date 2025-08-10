@@ -58,14 +58,12 @@
         v-model:content="newMessage"
         ref="editorRef"
         theme="snow"
-        :content="newMessage"
         contentType="html"
-        :placeholder="`Message ${selectedRoom.name}...`"
+        :placeholder="selectedRoom.name"
         :toolbar="[
           ['bold', 'italic', 'underline', 'strike'],
-          ['image', 'link'],
           [{ list: 'ordered' }, { list: 'bullet' }],
-          ['code'],
+          ['image', 'code'],
         ]"
         class="quill-editor"
       ></QuillEditor>
@@ -86,17 +84,13 @@
 </template>
 
 <script setup>
-// your existing script unchanged
 import { uploadFiles } from "@/utils/api";
-import { ref, onMounted, defineComponent } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { QuillEditor } from "@vueup/vue-quill";
 
 const props = defineProps({
   selectedRoom: Object,
   loadingMessages: Boolean,
-  files: Array,
-  newMessage: String,
-  isSending: Boolean,
 });
 
 const emit = defineEmits(["send-message"]);
@@ -106,6 +100,26 @@ const isSending = ref(false);
 const files = ref([]);
 const editorRef = ref(null);
 const fileInput = ref(null);
+
+watch(
+  () => props.selectedRoom,
+  (newRoom) => {
+    if (!editorRef.value) return;
+
+    const quill = editorRef.value.editor.__quill;
+    if (!quill) return;
+
+    const editorElem = quill.root;
+    if (editorElem) {
+      const placeholderText = newRoom
+        ? `Message ${newRoom.name}...`
+        : "Message...";
+
+      editorElem.setAttribute("data-placeholder", placeholderText);
+    }
+  },
+  { immediate: true }
+);
 
 function triggerFileInput() {
   console.log("triggered");
@@ -145,6 +159,14 @@ function formatFileSize(size) {
   }
 }
 
+function clearQuillEditor() {
+  if (!editorRef.value) return;
+  const quill = editorRef.value.editor.__quill;
+  if (!quill) return;
+
+  quill.root.innerHTML = "<p><br></p>";
+}
+
 async function sendMessage() {
   if (!newMessage.value.trim() && files.value.length == 0) return;
 
@@ -181,6 +203,7 @@ async function sendMessage() {
     });
   }
   newMessage.value = "";
+  clearQuillEditor();
   files.value = [];
   isSending.value = false;
 }
@@ -203,12 +226,39 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style>
 .relative.flex-1 {
   min-width: 0; /* critical for flex children to wrap/shrink */
 }
 
-::v-deep(.ql-editor) {
+.ql-toolbar {
+  display: flex;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+}
+
+.ql-toolbar .ql-formats button {
+  color: #333;
+  background: transparent;
+  border: none;
+  margin: 0 4px;
+}
+
+.ql-toolbar .ql-formats button:hover {
+  background-color: #ddd;
+}
+
+.ql-toolbar .ql-formats .ql-active {
+  background-color: #aaa;
+  color: white;
+}
+
+.ql-editor {
+  font-size: 16px;
+  resize: none; /* disables manual resize */
+  flex-grow: 1; /* flex-1 */
+  color: #18181b; /* text-zinc-950 */
+  min-height: 70px;
   max-height: 400px;
   padding-right: 50px;
   padding-bottom: 50px;
