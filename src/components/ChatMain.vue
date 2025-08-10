@@ -1,10 +1,13 @@
 <template>
   <main class="w-full flex-1 pt-4 flex flex-col overflow-hidden">
+    <!-- Chat Header -->
     <ChatMainHeader
       :selectedRoom="selectedRoom"
       :currentUser="currentUser"
       @select-temp-dm-room="selectTempDmRoom"
     ></ChatMainHeader>
+
+    <!-- Empty Messages -->
     <div
       v-if="selectedRoom && !loadingMessages && !messages.length"
       class="flex-1 flex items-center justify-center text-sm text-gray-500"
@@ -18,6 +21,8 @@
         Send a message to start a DM
       </div>
     </div>
+
+    <!-- Messages Container -->
     <div
       v-if="currentUser && !loadingMessages && messages.length > 0"
       ref="messagesContainer"
@@ -53,6 +58,7 @@
             <div v-else class="w-9 h-9 mr-2 flex-shrink-0"></div>
 
             <div class="min-w-0 break-words w-full">
+              <!-- Sender Name and Timestamp -->
               <div
                 v-if="
                   groupIndex === 0 ||
@@ -74,6 +80,7 @@
                 </div>
               </div>
 
+              <!-- Message Content -->
               <div
                 v-for="(msg, msgIndex) in group.messages"
                 :key="msg.id"
@@ -84,6 +91,8 @@
                   class="pt-1 text-left whitespace-pre-wrap break-words"
                   v-html="msg.content"
                 />
+
+                <!-- Message Media (Images, Videos) -->
                 <div v-if="msg.mediaUrl" class="mt-2">
                   <DashPlayer
                     v-if="
@@ -148,12 +157,16 @@
         </div>
       </div>
     </div>
+
+    <!-- Chat Input -->
     <ChatInput
       :selectedRoom="selectedRoom"
       :loadingMessages="loadingMessages"
       @send-message="sendMessage"
     ></ChatInput>
   </main>
+
+  <!-- Image Enlargement Modal -->
   <transition name="fade">
     <div
       v-if="enlargedImage"
@@ -424,6 +437,7 @@ const onScroll = () => {
 </script>
 
 <style>
+/* Basic styles for fade transition */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s ease;
@@ -440,14 +454,44 @@ const onScroll = () => {
   transition-duration: 150ms;
 }
 
-.relative {
-  position: relative;
-  display: inline-block;
+code {
+  background-color: #dddada;
+  padding: 5px;
+  border-radius: 8px;
+  margin-left: 2px;
+  margin-right: 2px;
 }
 
-.absolute {
-  position: absolute;
-  background-color: rgba(0, 0, 0, 0.3);
-  border-radius: 0.25rem; /* Match your image rounding */
+pre {
+  display: block;
+  background-color: #dddada;
+  border-radius: 4px;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #333;
+  font-family: monospace, "Courier New", Courier, "Lucida Sans Typewriter",
+    "Lucida Typewriter", "monospace";
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+ol,
+ul {
+  padding-left: 20px;
+}
+
+ul li {
+  list-style-type: disc;
+}
+
+ol li {
+  list-style-type: decimal;
+}
+
+/* Hover effects for image preview */
+.relative:hover .brightness-75 {
+  filter: brightness(0.75);
 }
 </style>
