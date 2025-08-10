@@ -175,9 +175,10 @@
                 :ref="setMessageRef(msg.id)"
                 class="pt-2 text-left whitespace-pre-wrap break-words"
               >
-                <div class="pt-1 text-left whitespace-pre-wrap break-words">
-                  {{ msg.content }}
-                </div>
+                <div
+                  class="pt-1 text-left whitespace-pre-wrap break-words"
+                  v-html="msg.content"
+                />
                 <div v-if="msg.mediaUrl" class="mt-2">
                   <DashPlayer
                     v-if="
@@ -307,7 +308,6 @@
         accept="image/*, video/*"
         :multiple="false"
       />
-
       <button
         @click="triggerFileInput"
         class="flex items-center justify-center h-12 w-12 mr-2 rounded-lg hover:bg-zinc-950 hover:text-white transition-colors duration-200"
@@ -315,16 +315,24 @@
       >
         <Paperclip class="w-6 h-6"></Paperclip>
       </button>
-      <textarea
-        ref="textAreaRef"
-        @input="autoResize"
-        v-model="newMessage"
-        @keydown.enter="onEnter"
-        rows="1"
-        type="text"
-        :placeholder="`Message ${selectedRoom.name}...`"
-        class="scrollbar-hide resize-none flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
-      />
+      <div
+        class="scrollbar-hide resize-none flex-1 p-3 text-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
+      >
+        <QuillEditor
+          ref="editorRef"
+          v-model:content="newMessage"
+          theme="snow"
+          content="string"
+          contentType="html"
+          :placeholder="`Message ${selectedRoom.name}...`"
+          :toolbar="[
+            ['bold', 'italic', 'underline', 'strike', 'link'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['code-block'],
+          ]"
+        ></QuillEditor>
+      </div>
+
       <button
         @click="sendMessage"
         class="flex items-center justify-center h-12 w-12 ml-2 rounded-lg hover:bg-zinc-950 hover:text-white transition-colors duration-200"
@@ -431,6 +439,7 @@ import DashPlayer from "./DashPlayer.vue";
 import { BACKEND_URL } from "@/main";
 import { useParticipants } from "@/utils/useParticipants";
 import BaseDialog from "./Dialog.vue";
+import { QuillEditor } from "@vueup/vue-quill";
 
 const props = defineProps({
   selectedRoom: Object,
@@ -463,6 +472,21 @@ const hasScrolled = ref(false);
 
 const enlargedImage = ref(null);
 const hoveredImageId = ref(null);
+const editorRef = ref(null);
+const newMessage = ref("");
+
+onMounted(() => {
+  const quill = editorRef.value;
+  if (!quill) return;
+
+  quill.editor.__quill.keyboard.bindings[13].unshift({
+    key: 13,
+    handler: (range, context) => {
+      sendMessage();
+      return false;
+    },
+  });
+});
 
 function clickSendDm(selectedUser) {
   closeMembersPopover();
@@ -742,16 +766,6 @@ const emit = defineEmits([
   "fetch-more-messages",
   "select-temp-dm-room",
 ]);
-const newMessage = ref("");
-
-function onEnter(event) {
-  if (event.shiftKey) {
-    return;
-  }
-
-  event.preventDefault();
-  sendMessage();
-}
 
 async function sendMessage() {
   if (!newMessage.value.trim() && files.value.length == 0) return;
@@ -791,12 +805,6 @@ async function sendMessage() {
   newMessage.value = "";
   files.value = [];
   isSending.value = false;
-
-  nextTick(() => {
-    if (textAreaRef.value) {
-      textAreaRef.value.style.height = "auto";
-    }
-  });
 }
 
 const onScroll = () => {
@@ -844,5 +852,38 @@ const onScroll = () => {
   position: absolute;
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 0.25rem; /* Match your image rounding */
+}
+
+.ql-toolbar {
+  display: flex;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+}
+
+.ql-toolbar .ql-formats button {
+  color: #333;
+  background: transparent;
+  border: none;
+  margin: 0 4px;
+}
+
+.ql-toolbar .ql-formats button:hover {
+  background-color: #ddd;
+}
+
+.ql-toolbar .ql-formats .ql-active {
+  background-color: #aaa;
+  color: white;
+}
+
+.ql-editor {
+  overflow-y: hidden; /* hides scrollbar, like scrollbar-hide */
+  resize: none; /* disables manual resize */
+  flex-grow: 1; /* flex-1 */
+  color: #18181b; /* text-zinc-950 */
+  border-radius: 0.5rem; /* rounded-lg (8px) */
+  outline: none;
+  box-shadow: none;
+  min-height: 70px;
 }
 </style>

@@ -49,6 +49,8 @@ import { Mail } from "lucide-vue-next";
 import { Heart } from "lucide-vue-next";
 
 import "./index.css";
+import { QuillEditor } from "@vueup/vue-quill";
+import "@vueup/vue-quill/dist/vue-quill.snow.css";
 
 export const BACKEND_URL =
   import.meta?.env?.BACKNED_URL || "http://localhost:8080";
@@ -131,6 +133,7 @@ app.component("Dialog", Dialog);
 app.component("Popover", Popover);
 app.component("Avatar", Avatar);
 app.component("FileUpload", FileUpload);
+app.component("QuillEditor", QuillEditor);
 
 app.component("LoaderCircle", LoaderCircle);
 app.component("UserIcon", User);
