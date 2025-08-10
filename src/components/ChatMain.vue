@@ -6,6 +6,19 @@
       @select-temp-dm-room="selectTempDmRoom"
     ></ChatMainHeader>
     <div
+      v-if="selectedRoom && !loadingMessages && !messages.length"
+      class="flex-1 flex items-center justify-center text-sm text-gray-500"
+    >
+      <div v-if="!selectedRoom.dm" class="flex flex-col items-center">
+        <MessagesSquare class="mb-4 w-8 h-8"></MessagesSquare>
+        Nothing yet, break the ice?
+      </div>
+      <div v-else class="flex flex-col items-center">
+        <MessagesSquare class="mb-4 w-8 h-8"></MessagesSquare>
+        Send a message to start a DM
+      </div>
+    </div>
+    <div
       v-if="currentUser && !loadingMessages && messages.length > 0"
       ref="messagesContainer"
       class="flex-1 overflow-y-auto min-w-0"
@@ -135,28 +148,12 @@
         </div>
       </div>
     </div>
-
-    <div
-      v-if="selectedRoom && !loadingMessages && !messages.length"
-      class="flex-1 flex items-center justify-center text-sm text-gray-500"
-    >
-      <div v-if="!selectedRoom.dm" class="flex flex-col items-center">
-        <MessagesSquare class="mb-4 w-8 h-8"></MessagesSquare>
-        Nothing yet, break the ice?
-      </div>
-      <div v-else class="flex flex-col items-center">
-        <MessagesSquare class="mb-4 w-8 h-8"></MessagesSquare>
-        Send a message to start a DM
-      </div>
-    </div>
-
     <ChatInput
       :selectedRoom="selectedRoom"
       :loadingMessages="loadingMessages"
       @send-message="sendMessage"
     ></ChatInput>
   </main>
-
   <transition name="fade">
     <div
       v-if="enlargedImage"
