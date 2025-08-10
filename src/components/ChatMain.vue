@@ -456,10 +456,16 @@ const onScroll = () => {
 
 code {
   background-color: #dddada;
-  padding: 5px;
-  border-radius: 8px;
-  margin-left: 2px;
-  margin-right: 2px;
+  border-radius: 4px;
+  padding: 4px;
+  margin-right: 4px;
+  margin-left: 4px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: #333;
+  font-family: monospace, "Courier New", Courier, "Lucida Sans Typewriter",
+    "Lucida Typewriter", "monospace";
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 pre {
