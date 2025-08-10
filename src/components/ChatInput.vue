@@ -62,6 +62,12 @@
         :content="newMessage"
         contentType="html"
         :placeholder="`Message ${selectedRoom.name}...`"
+        :toolbar="[
+          ['bold', 'italic', 'underline', 'strike'],
+          ['link', 'image'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['code-block'],
+        ]"
         :modules="modules"
       ></QuillEditor>
     </div>
