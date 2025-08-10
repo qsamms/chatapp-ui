@@ -1,13 +1,11 @@
 <template>
   <main class="w-full flex-1 pt-4 flex flex-col overflow-hidden">
-    <!-- Chat Header -->
     <ChatMainHeader
       :selectedRoom="selectedRoom"
       :currentUser="currentUser"
       @select-temp-dm-room="selectTempDmRoom"
     ></ChatMainHeader>
 
-    <!-- Empty Messages -->
     <div
       v-if="selectedRoom && !loadingMessages && !messages.length"
       class="flex-1 flex items-center justify-center text-sm text-gray-500"
@@ -22,7 +20,6 @@
       </div>
     </div>
 
-    <!-- Messages Container -->
     <div
       v-if="currentUser && !loadingMessages && messages.length > 0"
       ref="messagesContainer"
@@ -58,7 +55,6 @@
             <div v-else class="w-9 h-9 mr-2 flex-shrink-0"></div>
 
             <div class="min-w-0 break-words w-full">
-              <!-- Sender Name and Timestamp -->
               <div
                 v-if="
                   groupIndex === 0 ||
@@ -80,7 +76,6 @@
                 </div>
               </div>
 
-              <!-- Message Content -->
               <div
                 v-for="(msg, msgIndex) in group.messages"
                 :key="msg.id"
@@ -92,7 +87,6 @@
                   v-html="msg.content"
                 />
 
-                <!-- Message Media (Images, Videos) -->
                 <div v-if="msg.mediaUrl" class="mt-2">
                   <DashPlayer
                     v-if="
@@ -158,7 +152,6 @@
       </div>
     </div>
 
-    <!-- Chat Input -->
     <ChatInput
       :selectedRoom="selectedRoom"
       :loadingMessages="loadingMessages"
@@ -166,7 +159,6 @@
     ></ChatInput>
   </main>
 
-  <!-- Image Enlargement Modal -->
   <transition name="fade">
     <div
       v-if="enlargedImage"
