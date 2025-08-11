@@ -49,12 +49,13 @@
 
         <div class="flex">
           <Autocomplete
+            v-model="searchText"
             :suggestions="filteredChatRooms"
             @complete="searchChatRooms"
             @option-select="handleAutocompleteRoomClick"
             optionLabel="name"
             placeholder="Search Channels..."
-            class="mx-4 border border-zinc-950 rounded-lg p-2 mt-2 text-zinc-600 w-full"
+            class="mx-2 border border-zinc-950 rounded-lg p-2 mt-2 text-zinc-600 w-full"
           />
         </div>
 
@@ -216,6 +217,7 @@ const emit = defineEmits([
 ]);
 
 useHeartbeat();
+const searchText = ref("");
 const isLogoutDialogOpen = ref(false);
 const isHovering = ref(false);
 const isCollapsed = ref(false);
@@ -241,6 +243,7 @@ function onClickSettingsDialogOpen() {
 }
 
 function handleAutocompleteRoomClick(event) {
+  searchText.value = "";
   emit("select-room", event.value);
 }
 
@@ -260,4 +263,24 @@ function handleClickInvite(room) {
   emit("invite-room", room);
 }
 </script>
-@
+
+<style>
+.p-autocomplete-overlay {
+  --p-autocomplete-overlay-background: white;
+  --p-autocomplete-overlay-border-radius: 4px;
+}
+
+.p-autocomplete-list-container ul {
+  padding-left: 8px;
+}
+
+.p-autocomplete-list-container ul li {
+  --p-autocomplete-option-border-radius: 4px;
+  padding-left: 4px;
+  padding-top: 6px;
+}
+
+.p-autocomplete-list-container ul li:hover {
+  background-color: #f3f4f6;
+}
+</style>
