@@ -64,11 +64,21 @@ export async function getParticipants(roomId) {
 }
 
 export async function sendFriendRequest(username) {
-  const repsonse = await api.post("/friendships/send/", { username });
-  return response;
+  return await api.post("/friendships/send/", { username });
 }
 
 export async function getFriends() {
-  const response = await api.get("/friendships");
-  return response;
+  return await api.get("/friendships/");
+}
+
+export async function acceptFriendRequest(id) {
+  return await api.post(`/friendships/accept/${id}/`);
+}
+
+export async function getPendingRequests() {
+  return await api.get("/friendships/pending-received/");
+}
+
+export async function removeFriend(id) {
+  return await api.delete(`/friendships/${id}/`);
 }

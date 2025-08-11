@@ -130,7 +130,29 @@
               <MessageCircle class="w-4 h-4 mr-2"></MessageCircle>Direct Message
             </button>
             <button
-              @click="sendFriendRequest(selectedUser.user.username)"
+              v-if="pendingFriendRequest.id"
+              @click="onClickAcceptFriendRequest()"
+              class="text-sm flex items-center justify-center w-full mt-4 bg-zinc-700 hover:bg-zinc-950 text-white py-1 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 transition duration-150 ease-in-out"
+            >
+              <Heart class="w-4 h-4 mr-2"></Heart>Accept Friend Request
+            </button>
+            <button
+              v-else-if="isMyFriend(selectedUser.user)"
+              @click="clickRemoveFriend()"
+              class="text-sm flex items-center justify-center w-full mt-4 bg-zinc-700 hover:bg-zinc-950 text-white py-1 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 transition duration-150 ease-in-out"
+            >
+              <Heart class="w-4 h-4 mr-2"></Heart>Remove Friend
+            </button>
+            <button
+              v-else-if="haveSentFriendRequest()"
+              disabled
+              class="text-sm flex items-center justify-center w-full mt-4 bg-zinc-700 hover:bg-zinc-950 text-white py-1 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 transition duration-150 ease-in-out"
+            >
+              <Heart class="w-4 h-4 mr-2"></Heart>Friend Request Sent
+            </button>
+            <button
+              v-else
+              @click="onClickSendFriendRequest()"
               class="text-sm flex items-center justify-center w-full mt-4 bg-zinc-700 hover:bg-zinc-950 text-white py-1 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 transition duration-150 ease-in-out"
             >
               <Heart class="w-4 h-4 mr-2"></Heart>Add friend
@@ -143,10 +165,15 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useParticipants } from "@/utils/useParticipants";
 import BaseDialog from "./Dialog";
-import { sendFriendRequest } from "@/utils/api";
+import {
+  sendFriendRequest,
+  acceptFriendRequest,
+  getFriends,
+  removeFriend,
+} from "@/utils/api";
 
 const props = defineProps({
   selectedRoom: Object,
@@ -155,7 +182,18 @@ const props = defineProps({
 const { participants } = useParticipants(() => props.selectedRoom);
 const selectedUser = ref({});
 const isUserDialogOpen = ref(false);
+const pendingFriendRequest = ref({});
+const myFriends = ref([]);
+const pendingRequests = ref([]);
+const sentRequests = ref([]);
 const emit = defineEmits(["select-temp-dm-room"]);
+
+onMounted(async () => {
+  const response = await getFriends();
+  myFriends.value = response.data.accepted;
+  pendingRequests.value = response.data.pendingReceived;
+  sentRequests.value = response.data.pendingSent;
+});
 
 function getNumActiveMembers() {
   let count = 0;
@@ -177,10 +215,64 @@ function isUserOnline(lastHeartbeat) {
   return diff < 60_000;
 }
 
-function onClickParticipant(participant) {
+async function reFetchFriends() {
+  pendingFriendRequest.value = {};
+  const response = await getFriends();
+  myFriends.value = response.data.accepted;
+  pendingRequests.value = response.data.pendingReceived;
+  sentRequests.value = response.data.pendingSent;
+  checkForPendingRequest();
+}
+
+async function onClickSendFriendRequest() {
+  await sendFriendRequest(selectedUser.value.user.username);
+  await reFetchFriends();
+}
+
+async function onClickAcceptFriendRequest() {
+  await acceptFriendRequest(pendingFriendRequest.value.id);
+  await reFetchFriends();
+}
+
+async function clickRemoveFriend() {
+  const friendship = myFriends.value.find(
+    (f) => f.friend.username === selectedUser.value.user.username
+  );
+  await removeFriend(friendship.id);
+  await reFetchFriends();
+}
+
+function isMyFriend(user) {
+  for (const friendship of myFriends.value) {
+    if (friendship.friend.username === user.username) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function haveSentFriendRequest() {
+  for (const friendship of sentRequests.value) {
+    if (friendship.receiver.username === selectedUser.value.user.username) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function checkForPendingRequest() {
+  for (const req of pendingRequests.value) {
+    if (req.sender.username === selectedUser.value.user.username) {
+      pendingFriendRequest.value = req;
+    }
+  }
+}
+
+async function onClickParticipant(participant) {
   if (participant.user.username === props.currentUser.username) return;
   selectedUser.value = participant;
   isUserDialogOpen.value = true;
+  checkForPendingRequest();
 }
 
 function clickSendDm(selectedUser) {

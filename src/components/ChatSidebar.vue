@@ -145,29 +145,51 @@
           </table>
         </div>
       </div>
-      <div
-        v-if="!isCollapsed"
-        class="pt-2 pb-2 pl-2 pr-2 border-t-2 border-zinc-300"
-      >
-        <div
-          @click="onClickSettingsDialogOpen"
-          class="flex items-center text-md text-zinc-950 pl-4 pr-4 py-2 hover:bg-zinc-200 rounded-lg cursor-pointer"
-        >
-          <Settings class="pr-2 w-6 h-6" />
-          Settings
+      <div class="flex flex-col gap-2 p-2">
+        <div v-if="!isCollapsed" class="pt-2 border-t-2 border-zinc-300">
+          <div
+            @click="onClickFriendsDialogOpen"
+            class="flex items-center text-md text-zinc-950 pl-4 pr-4 py-2 hover:bg-zinc-200 rounded-lg cursor-pointer"
+          >
+            <Heart class="pr-2 w-6 h-6" />
+            Friends
+          </div>
         </div>
-      </div>
-      <div v-if="!isCollapsed" class="pb-2 pl-2 pr-2 border-zinc-300">
-        <div
-          @click="openLogoutDialog"
-          class="flex items-center text-md text-zinc-950 pl-4 pr-4 py-2 hover:bg-zinc-200 rounded-lg cursor-pointer"
-        >
-          <Logout class="pr-2 w-6 h-6" />
-          Logout
+        <div v-if="!isCollapsed">
+          <div
+            @click="onClickSettingsDialogOpen"
+            class="flex items-center text-md text-zinc-950 pl-4 pr-4 py-2 hover:bg-zinc-200 rounded-lg cursor-pointer"
+          >
+            <Settings class="pr-2 w-6 h-6" />
+            Settings
+          </div>
+        </div>
+        <div v-if="!isCollapsed">
+          <div
+            @click="openLogoutDialog"
+            class="flex items-center text-md text-zinc-950 pl-4 pr-4 py-2 hover:bg-zinc-200 rounded-lg cursor-pointer"
+          >
+            <Logout class="pr-2 w-6 h-6" />
+            Logout
+          </div>
         </div>
       </div>
     </aside>
   </div>
+
+  <BaseDialog v-model="friendsDialogOpen">
+    <template #header>
+      <div class="flex"><Heart class="pr-2" />Friends</div>
+    </template>
+
+    <div v-for="friend in friends">
+      <div>friend</div>
+    </div>
+
+    <div v-for="friend in friendRequests">
+      <div>friend</div>
+    </div>
+  </BaseDialog>
 
   <BaseDialog v-model="settingsDialogOpen">
     <template #header>
@@ -247,7 +269,7 @@ import { ref } from "vue";
 import { logout } from "@/utils/auth";
 import Dialog from "./Dialog.vue";
 import { useHeartbeat } from "@/utils/useHeartbeat";
-import { updateUser } from "@/utils/api";
+import { updateUser, getFriends } from "@/utils/api";
 import BaseDialog from "./Dialog.vue";
 
 const props = defineProps([
@@ -277,6 +299,11 @@ const isCollapsed = ref(false);
 const filteredChatRooms = ref([]);
 const settingsDialogOpen = ref(false);
 
+const friendsDialogOpen = ref(false);
+const friendRequests = ref([]);
+const friends = ref([]);
+const friendsError = ref(false);
+
 function searchChatRooms(event) {
   const query = event.query.toLowerCase();
   filteredChatRooms.value = props.acceptedChatRooms.filter((r) =>
@@ -294,6 +321,17 @@ function openLogoutDialog() {
 
 function onClickSettingsDialogOpen() {
   settingsDialogOpen.value = true;
+}
+
+async function onClickFriendsDialogOpen() {
+  friendsDialogOpen.value = true;
+  try {
+    const response = await getFriends();
+    friends.value = response.data.accepted;
+    friendRequests.value = response.data.pendingReceived;
+  } catch (e) {
+    friendsError.value = true;
+  }
 }
 
 async function handleClickSaveProfile() {
