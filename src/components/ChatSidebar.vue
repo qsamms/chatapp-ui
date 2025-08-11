@@ -266,12 +266,13 @@ function handleClickInvite(room) {
 
 <style>
 .p-autocomplete-overlay {
+  min-width: 280px !important;
   --p-autocomplete-overlay-background: white;
   --p-autocomplete-overlay-border-radius: 4px;
 }
 
 .p-autocomplete-list-container ul {
-  padding-left: 8px;
+  padding: 4px;
 }
 
 .p-autocomplete-list-container ul li {
@@ -280,7 +281,9 @@ function handleClickInvite(room) {
   padding-top: 6px;
 }
 
-.p-autocomplete-list-container ul li:hover {
-  background-color: #f3f4f6;
+.p-autocomplete-option:not(.p-autocomplete-option-selected):not(
+    .p-disabled
+  ).p-focus {
+  --p-autocomplete-option-focus-background: #e5e7eb;
 }
 </style>
