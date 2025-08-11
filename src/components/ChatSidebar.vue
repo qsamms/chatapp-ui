@@ -47,6 +47,17 @@
           />
         </div>
 
+        <div class="flex">
+          <Autocomplete
+            :suggestions="filteredChatRooms"
+            @complete="searchChatRooms"
+            @option-select="handleAutocompleteRoomClick"
+            optionLabel="name"
+            placeholder="Search Channels..."
+            class="mx-4 border border-zinc-950 rounded-lg p-2 mt-2 text-zinc-600 w-full"
+          />
+        </div>
+
         <div class="overflow-y-auto">
           <table
             v-if="acceptedChatRooms.length"
@@ -62,7 +73,7 @@
               >
                 <td
                   :class="[
-                    'p-2 flex justify-between items-center cursor-pointer min-h-8 rounded-lg',
+                    'p-2 flex justify-between items-center cursor-pointer max-h-10 rounded-lg',
                     selectedRoom?.id === room.id
                       ? 'bg-zinc-950 text-white'
                       : 'hover:bg-zinc-200 text-zinc-600',
@@ -110,7 +121,7 @@
               >
                 <td
                   :class="[
-                    'p-2 flex justify-between items-center cursor-pointer min-h-8 rounded-lg',
+                    'p-2 flex justify-between items-center cursor-pointer max-h-10 rounded-lg',
                     selectedRoom?.id === room.id
                       ? 'bg-zinc-950 text-white'
                       : 'hover:bg-zinc-200 text-zinc-600',
@@ -208,6 +219,14 @@ useHeartbeat();
 const isLogoutDialogOpen = ref(false);
 const isHovering = ref(false);
 const isCollapsed = ref(false);
+const filteredChatRooms = ref([]);
+
+function searchChatRooms(event) {
+  const query = event.query.toLowerCase();
+  filteredChatRooms.value = props.acceptedChatRooms.filter((r) =>
+    r.name.toLowerCase().includes(query)
+  );
+}
 
 function setIsHovering(val) {
   isHovering.value = val;
@@ -219,6 +238,10 @@ function openLogoutDialog() {
 
 function onClickSettingsDialogOpen() {
   emit("settings-clicked");
+}
+
+function handleAutocompleteRoomClick(event) {
+  emit("select-room", event.value);
 }
 
 function handleRoomClick(room) {

@@ -15,6 +15,7 @@ import { Form } from "@primevue/forms";
 import Dialog from "primevue/dialog";
 import Avatar from "primevue/avatar";
 import FileUpload from "primevue/fileupload";
+import Autocomplete from "primevue/autocomplete";
 
 import {
   CloudMoon,
@@ -134,6 +135,7 @@ app.component("Popover", Popover);
 app.component("Avatar", Avatar);
 app.component("FileUpload", FileUpload);
 app.component("QuillEditor", QuillEditor);
+app.component("Autocomplete", Autocomplete);
 
 app.component("LoaderCircle", LoaderCircle);
 app.component("UserIcon", User);
