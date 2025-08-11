@@ -174,6 +174,7 @@ import {
   getFriends,
   removeFriend,
 } from "@/utils/api";
+import { isUserOnline } from "@/utils/utils";
 
 const props = defineProps({
   selectedRoom: Object,
@@ -203,16 +204,6 @@ function getNumActiveMembers() {
     }
   }
   return count;
-}
-
-function isUserOnline(lastHeartbeat) {
-  if (!lastHeartbeat) return false;
-
-  const last = new Date(lastHeartbeat).getTime();
-  const now = Date.now();
-  const diff = now - last;
-
-  return diff < 60_000;
 }
 
 async function reFetchFriends() {

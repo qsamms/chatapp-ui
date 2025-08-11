@@ -160,8 +160,8 @@
             @click="onClickSettingsDialogOpen"
             class="flex items-center text-md text-zinc-950 pl-4 pr-4 py-2 hover:bg-zinc-200 rounded-lg cursor-pointer"
           >
-            <Settings class="pr-2 w-6 h-6" />
-            Settings
+            <User class="pr-2 w-6 h-6" />
+            Profile
           </div>
         </div>
         <div v-if="!isCollapsed">
@@ -182,18 +182,111 @@
       <div class="flex"><Heart class="pr-2" />Friends</div>
     </template>
 
-    <div v-for="friend in friends">
-      <div>friend</div>
+    <div class="flex border-b border-zinc-300 mb-4">
+      <button
+        class="flex-1 py-2 text-center"
+        :class="
+          onFriendsTab
+            ? 'border-b-2 border-zinc-950 font-semibold'
+            : 'text-zinc-500'
+        "
+        @click="onFriendsTab = true"
+      >
+        Your Friends
+      </button>
+      <button
+        class="flex-1 py-2 text-center"
+        :class="
+          !onFriendsTab
+            ? 'border-b-2 border-zinc-950 font-semibold'
+            : 'text-zinc-500'
+        "
+        @click="onFriendsTab = false"
+      >
+        Friend Requests
+      </button>
     </div>
 
-    <div v-for="friend in friendRequests">
-      <div>friend</div>
+    <div v-if="onFriendsTab">
+      <div v-if="friends.length">
+        <div
+          v-for="friend in friends"
+          :key="friend.id"
+          class="p-2 border-b border-zinc-200"
+        >
+          <div class="flex items-center">
+            <div
+              class="relative flex text-zinc-800 bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
+            >
+              <div
+                v-if="friend.friend.displayName"
+                class="uppercase font-semibold"
+              >
+                {{ friend.friend.displayName[0] }}
+              </div>
+              <div v-else class="uppercase font-semibold">
+                {{ friend.friend.firstName[0] }}{{ friend.friend.lastName[0] }}
+              </div>
+              <div
+                class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white"
+                :class="
+                  isUserOnline(friend.friend.lastHeartbeat)
+                    ? 'bg-green-500'
+                    : 'bg-gray-400'
+                "
+              ></div>
+            </div>
+            <div>
+              {{ getDisplayName(friend.friend) }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-else class="text-zinc-500 p-2">No friends yet.</div>
+    </div>
+
+    <div v-else>
+      <div v-if="friendRequests.length">
+        <div
+          v-for="friend in friendRequests"
+          :key="friend.id"
+          class="p-2 border-b border-zinc-200"
+        >
+          <div class="flex items-center">
+            <div
+              class="relative flex text-zinc-800 bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
+            >
+              <div
+                v-if="friend.sender.displayName"
+                class="uppercase font-semibold"
+              >
+                {{ friend.sender.displayName[0] }}
+              </div>
+              <div v-else class="uppercase font-semibold">
+                {{ friend.sender.firstName[0] }}{{ friend.sender.lastName[0] }}
+              </div>
+              <div
+                class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white"
+                :class="
+                  isUserOnline(friend.sender.lastHeartbeat)
+                    ? 'bg-green-500'
+                    : 'bg-gray-400'
+                "
+              ></div>
+            </div>
+            <div>
+              {{ getDisplayName(friend.sender) }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-else class="text-zinc-500 p-2">No pending requests.</div>
     </div>
   </BaseDialog>
 
   <BaseDialog v-model="settingsDialogOpen">
     <template #header>
-      <div class="flex"><Settings class="pr-2" />Settings</div>
+      <div class="flex"><User class="pr-2" />Profile</div>
     </template>
 
     <div class="flex flex-col gap-2">
@@ -271,6 +364,7 @@ import Dialog from "./Dialog.vue";
 import { useHeartbeat } from "@/utils/useHeartbeat";
 import { updateUser, getFriends } from "@/utils/api";
 import BaseDialog from "./Dialog.vue";
+import { getDisplayName, isUserOnline } from "@/utils/utils";
 
 const props = defineProps([
   "loadingRooms",
@@ -303,6 +397,7 @@ const friendsDialogOpen = ref(false);
 const friendRequests = ref([]);
 const friends = ref([]);
 const friendsError = ref(false);
+const onFriendsTab = ref(true);
 
 function searchChatRooms(event) {
   const query = event.query.toLowerCase();
