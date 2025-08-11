@@ -23,9 +23,7 @@
       :isFetchingMore="isFetchingMore"
       @send-message="sendMessage"
       @fetch-more-messages="fetchMoreMessages"
-      @select-temp-dm-room="selectTempDmRoom"
     />
-
     <div
       v-else
       class="flex-1 flex items-center justify-center text-sm text-gray-500"
@@ -35,6 +33,13 @@
         Can you hear the crickets?
       </div>
     </div>
+
+    <ChatParticipantsSidebar
+      v-if="selectedRoom && !selectedRoom.dm"
+      :selectedRoom="selectedRoom"
+      :currentUser="currentUser"
+      @select-temp-dm-room="selectTempDmRoom"
+    />
 
     <BaseDialog v-model="createRoomDialogOpen" :closeOnEscape="true">
       <template #header>
@@ -176,6 +181,7 @@ import {
   updateUser,
 } from "@/utils/api";
 import ChatSidebar from "./ChatSidebar.vue";
+import ChatParticipantsSidebar from "./ChatParticipantsSidebar.vue";
 import ChatMain from "./ChatMain.vue";
 import BaseDialog from "./Dialog.vue";
 import { Client } from "@stomp/stompjs";

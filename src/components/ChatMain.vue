@@ -3,7 +3,6 @@
     <ChatMainHeader
       :selectedRoom="selectedRoom"
       :currentUser="currentUser"
-      @select-temp-dm-room="selectTempDmRoom"
     ></ChatMainHeader>
 
     <div
@@ -214,10 +213,6 @@ const hasScrolled = ref(false);
 const enlargedImage = ref(null);
 const hoveredImageId = ref(null);
 
-function selectTempDmRoom(selectedUser) {
-  emit("select-temp-dm-room", selectedUser);
-}
-
 function openImageEnlarged(imageUrl) {
   enlargedImage.value = imageUrl;
 }
@@ -399,11 +394,7 @@ function formatTimestamp(timestamp, formal = false) {
   }
 }
 
-const emit = defineEmits([
-  "send-message",
-  "fetch-more-messages",
-  "select-temp-dm-room",
-]);
+const emit = defineEmits(["send-message", "fetch-more-messages"]);
 
 async function sendMessage(message) {
   emit("send-message", message);
