@@ -184,7 +184,7 @@
 
 <script setup>
 import { fetchImageBlob } from "@/utils/api";
-import { ref, watch, nextTick, computed, onMounted } from "vue";
+import { ref, watch, nextTick, computed } from "vue";
 import DashPlayer from "./DashPlayer.vue";
 import { BACKEND_URL } from "@/main";
 import ChatMainHeader from "./ChatMainHeader.vue";
@@ -327,7 +327,6 @@ watch(
     }
   }
 );
-
 watch(
   () => props.selectedRoom,
   async (oldRoom, newRoom) => {
@@ -420,7 +419,6 @@ const onScroll = () => {
 </script>
 
 <style>
-/* Basic styles for fade transition */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s ease;
@@ -479,7 +477,6 @@ ol li {
   list-style-type: decimal;
 }
 
-/* Hover effects for image preview */
 .relative:hover .brightness-75 {
   filter: brightness(0.75);
 }

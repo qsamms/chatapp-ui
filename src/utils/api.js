@@ -34,10 +34,6 @@ export async function createChatRoom(name) {
   return await api.post("/rooms/", { name });
 }
 
-export async function getFriends() {
-  return await api.get("/friendships/accepted/");
-}
-
 export async function getChatRoomInviteLink(chatRoomId) {
   return await api.get(`/rooms/${chatRoomId}/invite-link/`);
 }
@@ -64,5 +60,15 @@ export async function sendHeartbeat() {
 
 export async function getParticipants(roomId) {
   const response = await api.get(`rooms/${roomId}/participants/`);
+  return response;
+}
+
+export async function sendFriendRequest(username) {
+  const repsonse = await api.post("/friendships/send/", { username });
+  return response;
+}
+
+export async function getFriends() {
+  const response = await api.get("/friendships");
   return response;
 }

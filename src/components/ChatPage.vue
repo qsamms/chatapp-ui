@@ -6,8 +6,8 @@
       :dms="dms"
       :selectedRoom="selectedRoom"
       :error="error"
-      :settingsDialogOpen="settingsDialogOpen"
       :loadingMessages="loadingMessages"
+      :currentUser="currentUser"
       @open-create-room="createRoomDialogOpen = true"
       @open-create-dm="createDMDialogOpen = true"
       @select-room="selectRoom"
@@ -118,55 +118,6 @@
         </div>
       </div>
     </BaseDialog>
-
-    <BaseDialog v-model="settingsDialogOpen">
-      <template #header>
-        <div class="flex"><Settings class="pr-2" />Settings</div>
-      </template>
-
-      <div class="flex flex-col gap-2">
-        <div>
-          <div class="flex items-center align-center">
-            <div
-              class="flex ml-2 mt-2 text-zinc-800 flex bg-slate-200 w-10 h-10 rounded-full items-center justify-center"
-            >
-              <div class="text-lg uppercase">
-                {{ currentUser.firstName[0] }}{{ currentUser.lastName[0] }}
-              </div>
-            </div>
-            <div class="pl-2 text-lg">
-              {{ currentUser.firstName }} {{ currentUser.lastName }}
-            </div>
-          </div>
-          <div class="pl-2 text-md pt-4 text-zinc-500">
-            {{ currentUser.email }}
-          </div>
-        </div>
-
-        <div class="flex flex-col pt-4">
-          <label class="pb-2">Display Name</label>
-          <input
-            v-model="currentUser.displayName"
-            class="flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
-          />
-        </div>
-
-        <div class="flex flex-col pt-2">
-          <label class="pb-2">Bio</label>
-          <textarea
-            v-model="currentUser.bio"
-            class="flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
-          ></textarea>
-        </div>
-      </div>
-
-      <button
-        @click="handleClickSaveProfile"
-        class="w-full mt-4 bg-zinc-700 text-white py-1 px-4 rounded-md hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 transition duration-150 ease-in-out text-lg"
-      >
-        Save Profile
-      </button>
-    </BaseDialog>
   </div>
 </template>
 
@@ -178,7 +129,6 @@ import {
   getMessages,
   createChatRoom,
   getChatRoomInviteLink,
-  updateUser,
 } from "@/utils/api";
 import ChatSidebar from "./ChatSidebar.vue";
 import ChatParticipantsSidebar from "./ChatParticipantsSidebar.vue";
@@ -215,17 +165,7 @@ const newRoomName = ref("");
 
 const inviteFriendsDialogOpen = ref(false);
 
-const settingsDialogOpen = ref(false);
-
 const inviteLink = ref("");
-
-async function handleClickSaveProfile() {
-  await updateUser({
-    bio: currentUser.value.bio,
-    displayName: currentUser.value.displayName,
-  });
-  settingsDialogOpen.value = false;
-}
 
 function handleClickCopy() {
   navigator.clipboard.writeText(inviteLink.value);
@@ -235,10 +175,6 @@ async function handleClickInvite(room) {
   const inviteId = (await getChatRoomInviteLink(room.id)).data.id;
   inviteLink.value = `${FE_URL}/rooms/join/${inviteId}/`;
   inviteFriendsDialogOpen.value = true;
-}
-
-async function handleClickSettings() {
-  settingsDialogOpen.value = true;
 }
 
 async function fetchChatRooms() {

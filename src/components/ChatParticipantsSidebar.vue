@@ -130,6 +130,7 @@
               <MessageCircle class="w-4 h-4 mr-2"></MessageCircle>Direct Message
             </button>
             <button
+              @click="sendFriendRequest(selectedUser.user.username)"
               class="text-sm flex items-center justify-center w-full mt-4 bg-zinc-700 hover:bg-zinc-950 text-white py-1 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 transition duration-150 ease-in-out"
             >
               <Heart class="w-4 h-4 mr-2"></Heart>Add friend
@@ -145,6 +146,7 @@
 import { ref } from "vue";
 import { useParticipants } from "@/utils/useParticipants";
 import BaseDialog from "./Dialog";
+import { sendFriendRequest } from "@/utils/api";
 
 const props = defineProps({
   selectedRoom: Object,

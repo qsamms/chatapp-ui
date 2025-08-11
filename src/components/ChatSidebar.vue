@@ -46,7 +46,6 @@
             class="cursor-pointer hover:bg-zinc-200 rounded-md text-zinc-950 w-5 h-5"
           />
         </div>
-
         <div class="flex">
           <Autocomplete
             v-model="searchText"
@@ -170,6 +169,55 @@
     </aside>
   </div>
 
+  <BaseDialog v-model="settingsDialogOpen">
+    <template #header>
+      <div class="flex"><Settings class="pr-2" />Settings</div>
+    </template>
+
+    <div class="flex flex-col gap-2">
+      <div>
+        <div class="flex items-center align-center">
+          <div
+            class="flex ml-2 mt-2 text-zinc-800 flex bg-slate-200 w-10 h-10 rounded-full items-center justify-center"
+          >
+            <div class="text-lg uppercase">
+              {{ currentUser.firstName[0] }}{{ currentUser.lastName[0] }}
+            </div>
+          </div>
+          <div class="pl-2 text-lg">
+            {{ currentUser.firstName }} {{ currentUser.lastName }}
+          </div>
+        </div>
+        <div class="pl-2 text-md pt-4 text-zinc-500">
+          {{ currentUser.email }}
+        </div>
+      </div>
+
+      <div class="flex flex-col pt-4">
+        <label class="pb-2">Display Name</label>
+        <input
+          v-model="currentUser.displayName"
+          class="flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
+        />
+      </div>
+
+      <div class="flex flex-col pt-2">
+        <label class="pb-2">Bio</label>
+        <textarea
+          v-model="currentUser.bio"
+          class="flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
+        ></textarea>
+      </div>
+    </div>
+
+    <button
+      @click="handleClickSaveProfile"
+      class="w-full mt-4 bg-zinc-700 text-white py-1 px-4 rounded-md hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 transition duration-150 ease-in-out text-lg"
+    >
+      Save Profile
+    </button>
+  </BaseDialog>
+
   <Dialog v-model="isLogoutDialogOpen">
     <template #header>
       <div class="flex"><Logout class="pr-2" />Log out</div>
@@ -199,6 +247,8 @@ import { ref } from "vue";
 import { logout } from "@/utils/auth";
 import Dialog from "./Dialog.vue";
 import { useHeartbeat } from "@/utils/useHeartbeat";
+import { updateUser } from "@/utils/api";
+import BaseDialog from "./Dialog.vue";
 
 const props = defineProps([
   "loadingRooms",
@@ -206,7 +256,10 @@ const props = defineProps([
   "dms",
   "selectedRoom",
   "error",
+  "currentUser",
 ]);
+
+console.log("currentUser");
 
 const emit = defineEmits([
   "select-room",
@@ -222,6 +275,7 @@ const isLogoutDialogOpen = ref(false);
 const isHovering = ref(false);
 const isCollapsed = ref(false);
 const filteredChatRooms = ref([]);
+const settingsDialogOpen = ref(false);
 
 function searchChatRooms(event) {
   const query = event.query.toLowerCase();
@@ -239,7 +293,15 @@ function openLogoutDialog() {
 }
 
 function onClickSettingsDialogOpen() {
-  emit("settings-clicked");
+  settingsDialogOpen.value = true;
+}
+
+async function handleClickSaveProfile() {
+  await updateUser({
+    bio: currentUser.value.bio,
+    displayName: currentUser.value.displayName,
+  });
+  settingsDialogOpen.value = false;
 }
 
 function handleAutocompleteRoomClick(event) {
