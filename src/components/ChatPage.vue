@@ -94,7 +94,7 @@
             Add Friends
           </div>
           <div class="text-sm text-gray-400 pt-2">
-            Add your friends to this channel.
+            Share this invite link to add your friends to this channel.
           </div>
         </div>
       </template>

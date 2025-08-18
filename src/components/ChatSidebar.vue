@@ -215,34 +215,47 @@
           class="p-2 border-b border-zinc-200"
         >
           <div class="flex items-center">
-            <div
-              class="relative flex text-zinc-800 bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
-            >
-              <div
-                v-if="friend.friend.displayName"
-                class="uppercase font-semibold"
-              >
-                {{ friend.friend.displayName[0] }}
+            <div class="flex-1">
+              <div class="flex items-center">
+                <div
+                  class="relative flex text-zinc-800 bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
+                >
+                  <div
+                    v-if="friend.friend.displayName"
+                    class="uppercase font-semibold"
+                  >
+                    {{ friend.friend.displayName[0] }}
+                  </div>
+                  <div v-else class="uppercase font-semibold">
+                    {{ friend.friend.firstName[0]
+                    }}{{ friend.friend.lastName[0] }}
+                  </div>
+                  <div
+                    class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white"
+                    :class="
+                      isUserOnline(friend.friend.lastHeartbeat)
+                        ? 'bg-green-500'
+                        : 'bg-gray-400'
+                    "
+                  ></div>
+                </div>
+                <div>
+                  {{ getDisplayName(friend.friend) }}
+                </div>
               </div>
-              <div v-else class="uppercase font-semibold">
-                {{ friend.friend.firstName[0] }}{{ friend.friend.lastName[0] }}
-              </div>
-              <div
-                class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white"
-                :class="
-                  isUserOnline(friend.friend.lastHeartbeat)
-                    ? 'bg-green-500'
-                    : 'bg-gray-400'
-                "
-              ></div>
             </div>
-            <div>
-              {{ getDisplayName(friend.friend) }}
+            <div class="flex gap-2 items-center">
+              <button
+                @click="onClickDelete(friend.id)"
+                class="flex items-center rounded-lg bg-zinc-950 text-white p-2 text-white"
+              >
+                <X class="w-4 h-4" />Remove Friend
+              </button>
             </div>
           </div>
         </div>
       </div>
-      <div v-else class="text-zinc-500 p-2">No friends yet.</div>
+      <div v-else class="text-zinc-500 p-2">You have no friends.</div>
     </div>
 
     <div v-else>
@@ -253,29 +266,48 @@
           class="p-2 border-b border-zinc-200"
         >
           <div class="flex items-center">
-            <div
-              class="relative flex text-zinc-800 bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
-            >
-              <div
-                v-if="friend.sender.displayName"
-                class="uppercase font-semibold"
-              >
-                {{ friend.sender.displayName[0] }}
+            <div class="flex-1">
+              <div class="flex items-center">
+                <div
+                  class="relative flex text-zinc-800 bg-slate-200 w-8 h-8 rounded-full items-center justify-center mr-2"
+                >
+                  <div
+                    v-if="friend.sender.displayName"
+                    class="uppercase font-semibold"
+                  >
+                    {{ friend.sender.displayName[0] }}
+                  </div>
+                  <div v-else class="uppercase font-semibold">
+                    {{ friend.sender.firstName[0]
+                    }}{{ friend.sender.lastName[0] }}
+                  </div>
+                  <div
+                    class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white"
+                    :class="
+                      isUserOnline(friend.sender.lastHeartbeat)
+                        ? 'bg-green-500'
+                        : 'bg-gray-400'
+                    "
+                  ></div>
+                </div>
+                <div>
+                  {{ getDisplayName(friend.sender) }}
+                </div>
               </div>
-              <div v-else class="uppercase font-semibold">
-                {{ friend.sender.firstName[0] }}{{ friend.sender.lastName[0] }}
-              </div>
-              <div
-                class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white"
-                :class="
-                  isUserOnline(friend.sender.lastHeartbeat)
-                    ? 'bg-green-500'
-                    : 'bg-gray-400'
-                "
-              ></div>
             </div>
-            <div>
-              {{ getDisplayName(friend.sender) }}
+            <div class="flex gap-2 items-center">
+              <button
+                class="flex items-center rounded-lg bg-zinc-950 text-white p-2"
+                @click="onClickAccept(friend.id)"
+              >
+                <Check class="w-4 h-4" />Accept
+              </button>
+              <button
+                @click="onClickDelete(friend.id)"
+                class="flex items-center rounded-lg bg-slate-200 text-white p-2 text-zinc-950"
+              >
+                <X class="w-4 h-4" />Decline
+              </button>
             </div>
           </div>
         </div>
@@ -362,7 +394,12 @@ import { ref } from "vue";
 import { logout } from "@/utils/auth";
 import Dialog from "./Dialog.vue";
 import { useHeartbeat } from "@/utils/useHeartbeat";
-import { updateUser, getFriends } from "@/utils/api";
+import {
+  updateUser,
+  getFriends,
+  acceptFriendRequest,
+  deleteFriendRequest,
+} from "@/utils/api";
 import BaseDialog from "./Dialog.vue";
 import { getDisplayName, isUserOnline } from "@/utils/utils";
 
@@ -404,6 +441,16 @@ function searchChatRooms(event) {
   filteredChatRooms.value = props.acceptedChatRooms.filter((r) =>
     r.name.toLowerCase().includes(query)
   );
+}
+
+async function onClickAccept(id) {
+  await acceptFriendRequest(id);
+  await onClickFriendsDialogOpen();
+}
+
+async function onClickDelete(id) {
+  await deleteFriendRequest(id);
+  await onClickFriendsDialogOpen();
 }
 
 function setIsHovering(val) {

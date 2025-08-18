@@ -48,6 +48,7 @@ import { Ghost } from "lucide-vue-next";
 import { ChevronLeft, ChevronRight } from "lucide-vue-next";
 import { Mail } from "lucide-vue-next";
 import { Heart } from "lucide-vue-next";
+import { Check } from "lucide-vue-next";
 
 import "./index.css";
 import { QuillEditor } from "@vueup/vue-quill";
@@ -168,3 +169,4 @@ app.component("ChevronLeft", ChevronLeft);
 app.component("ChevronRight", ChevronRight);
 app.component("Mail", Mail);
 app.component("Heart", Heart);
+app.component("Check", Check);

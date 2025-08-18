@@ -75,6 +75,10 @@ export async function acceptFriendRequest(id) {
   return await api.post(`/friendships/accept/${id}/`);
 }
 
+export async function deleteFriendRequest(id) {
+  return await api.delete(`/friendships/${id}/`);
+}
+
 export async function getPendingRequests() {
   return await api.get("/friendships/pending-received/");
 }
