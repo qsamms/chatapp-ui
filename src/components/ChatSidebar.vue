@@ -478,8 +478,8 @@ async function onClickFriendsDialogOpen() {
 
 async function handleClickSaveProfile() {
   await updateUser({
-    bio: currentUser.value.bio,
-    displayName: currentUser.value.displayName,
+    bio: props.currentUser.bio,
+    displayName: props.currentUser.displayName,
   });
   settingsDialogOpen.value = false;
 }
