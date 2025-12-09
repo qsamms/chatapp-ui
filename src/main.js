@@ -78,7 +78,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Prevent infinite loop
-    const isRefreshRequest = originalRequest.url?.includes("/api/auth/refresh");
+    const isRefreshRequest = originalRequest.url?.includes("/auth/refresh");
 
     if (
       error.response &&
@@ -90,7 +90,7 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem("refreshToken");
 
       try {
-        const res = await api.post("/api/auth/refresh/", {
+        const res = await api.post("/auth/refresh/", {
           token: refreshToken,
         });
         const newAccessToken = res.data.accessToken;
