@@ -1,4 +1,4 @@
-import { throttle, update } from "lodash-es";
+import { throttle } from "lodash-es";
 import { onBeforeUnmount, onMounted } from "vue";
 import { logout } from "./auth";
 
