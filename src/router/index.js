@@ -33,15 +33,17 @@ const router = createRouter({
   routes,
 });
 
+const defaultPageTitle = "Chat";
+
 router.beforeEach(async (to, from, next) => {
-  const defaultTitle = "Chat";
-  document.title = to.meta.title || defaultTitle;
+  document.title = to.meta.title || defaultPageTitle;
   const requiresAuth = to.meta.requiresAuth;
   const token = localStorage.getItem("token");
   try {
-    const valid = await isTokenValid(token);
-    if (requiresAuth && !valid) {
-      next("/login");
+    if (requiresAuth) {
+      const valid = await isTokenValid(token);
+      if (!valid) next("/login");
+      next();
     } else if ((to.path === "/login" || to.path === "/signup") && valid) {
       next("/chat");
     } else {
