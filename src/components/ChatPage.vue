@@ -139,6 +139,9 @@ import SockJS from "sockjs-client";
 import { BACKEND_URL, FE_URL } from "@/main";
 import { useRoute, useRouter } from "vue-router";
 import { CloudMoon } from "lucide-vue-next";
+import { useAutoLogout } from "../utils/useAutoLogout";
+
+useAutoLogout();
 
 const route = useRoute();
 const router = useRouter();
