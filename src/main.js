@@ -53,6 +53,7 @@ import { Check } from "lucide-vue-next";
 import "./index.css";
 import { QuillEditor } from "@vueup/vue-quill";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
+import { logout } from "./utils/auth";
 
 export const BACKEND_URL =
   import.meta?.env?.BACKNED_URL || "http://localhost:8080";
@@ -97,12 +98,9 @@ api.interceptors.response.use(
         localStorage.setItem("accessToken", newAccessToken);
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(originalRequest);
-      } catch (refreshError) {
-        // logout on failure
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        router.push("/login");
-        return Promise.reject(refreshError);
+      } catch (error) {
+        logout();
+        return Promise.reject(error);
       }
     }
 
