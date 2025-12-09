@@ -43,12 +43,11 @@ router.beforeEach(async (to, from, next) => {
     if (requiresAuth) {
       const valid = await isTokenValid(token);
       if (!valid) next("/login");
-      next();
-    } else if ((to.path === "/login" || to.path === "/signup") && valid) {
-      next("/chat");
-    } else {
-      next();
+    } else if (to.path === "/login" || to.path === "/signup") {
+      const valid = await isTokenValid(token);
+      if (valid) next("/chat");
     }
+    next();
   } catch (err) {
     console.error(err);
     next("/login");

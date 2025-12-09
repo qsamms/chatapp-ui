@@ -55,7 +55,7 @@
         :toolbar="[
           ['bold', 'italic', 'underline', 'strike'],
           [{ list: 'ordered' }, { list: 'bullet' }],
-          ['image', 'code', 'code-block'],
+          ['code', 'code-block'],
         ]"
         class="quill-editor"
       ></QuillEditor>

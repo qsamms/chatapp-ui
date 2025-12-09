@@ -87,20 +87,12 @@ api.interceptors.response.use(
       !isRefreshRequest
     ) {
       originalRequest._retry = true;
-
       const refreshToken = localStorage.getItem("refreshToken");
 
       try {
-        const res = await api.post(
-          "/api/auth/refresh/",
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${refreshToken}`,
-            },
-          }
-        );
-
+        const res = await api.post("/api/auth/refresh/", {
+          token: refreshToken,
+        });
         const newAccessToken = res.data.accessToken;
         localStorage.setItem("accessToken", newAccessToken);
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
