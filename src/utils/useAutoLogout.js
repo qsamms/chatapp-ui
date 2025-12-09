@@ -9,7 +9,7 @@ export function useAutoLogout() {
     localStorage.setItem("lastActive", Date.now() / 1000);
   }, 10000);
 
-  const checkLastActive = setInterval(() => {
+  setInterval(() => {
     const lastActiveTimeFromEpochS = localStorage.getItem("lastActive");
     if (!lastActiveTimeFromEpochS) {
       return;
