@@ -80,7 +80,6 @@ api.interceptors.response.use(
 
     // Prevent infinite loop
     const isRefreshRequest = originalRequest.url?.includes("/auth/refresh");
-
     if (
       error.response &&
       error.response.status === 401 &&
@@ -89,7 +88,6 @@ api.interceptors.response.use(
     ) {
       originalRequest._retry = true;
       const refreshToken = localStorage.getItem("refreshToken");
-
       try {
         const res = await api.post("/auth/refresh/", {
           token: refreshToken,
@@ -100,7 +98,6 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (error) {
         logout();
-        return Promise.reject(error);
       }
     }
 
