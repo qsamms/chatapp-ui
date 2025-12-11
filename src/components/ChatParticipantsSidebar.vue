@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-screen">
+  <div class="flex">
     <aside
       :class="[
         'transition-all duration-300 border-l border-zinc-300 text-zinc-950 flex flex-col relative w-60',

@@ -1,128 +1,136 @@
 <template>
-  <div class="flex min-h-screen max-h-screen">
-    <ChatSidebar
-      :loadingRooms="loadingRooms"
-      :acceptedChatRooms="acceptedChatRooms"
-      :dms="dms"
-      :selectedRoom="selectedRoom"
-      :error="error"
-      :loadingMessages="loadingMessages"
-      :currentUser="currentUser"
-      @open-create-room="createRoomDialogOpen = true"
-      @open-create-dm="createDMDialogOpen = true"
-      @select-room="selectRoom"
-      @invite-room="handleClickInvite"
-      @settings-clicked="handleClickSettings"
-    />
-    <ChatMain
-      v-if="selectedRoom"
-      :selectedRoom="selectedRoom"
-      :messages="messages"
-      :currentUser="currentUser"
-      :moreMessages="moreMessages"
-      :isFetchingMore="isFetchingMore"
-      @send-message="sendMessage"
-      @fetch-more-messages="fetchMoreMessages"
-    />
-    <div
-      v-else
-      class="flex-1 flex items-center justify-center text-sm text-gray-500"
-    >
-      <div class="flex flex-col items-center">
-        <CloudMoon class="mb-4 w-8 h-8"></CloudMoon>
-        Can you hear the crickets?
-      </div>
+  <div class="flex flex-col min-h-screen max-h-screen">
+    <div>
+      <ChatHeader :currentUser="currentUser" @select-room="selectRoom" />
     </div>
-
-    <ChatParticipantsSidebar
-      v-if="selectedRoom && !selectedRoom.dm"
-      :selectedRoom="selectedRoom"
-      :currentUser="currentUser"
-      @select-temp-dm-room="selectTempDmRoom"
-    />
-
-    <BaseDialog v-model="createRoomDialogOpen" :closeOnEscape="true">
-      <template #header>
-        <div class="flex flex-col">
-          <div class="text-lg font-semibold flex items-center">
-            <Hash class="mr-2 w-5 h-5" />
-            Create New Channel
-          </div>
-          <div class="text-sm text-gray-400 pt-2">
-            Create a new channel to chat with friends/teammates.
-          </div>
-        </div>
-      </template>
-
-      <div class="flex flex-col gap-4">
-        <div class="flex flex-col gap-4 pl-2 pr-2">
-          <div class="flex flex-col">
-            <label class="pb-2">Channel Name*</label>
-            <input
-              v-model="newRoomName"
-              @keyup.enter="() => createRoom(newRoomName)"
-              class="flex-1 p-3 border border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
-            />
-          </div>
-          <button
-            class="bg-zinc-950 hover:bg-zinc-700 rounded py-2 px-4 text-white"
-            @click="() => createRoom(newRoomName)"
-          >
-            Create Channel
-          </button>
+    <div class="flex flex-1 overflow-hidden">
+      <ChatSidebar
+        :loadingRooms="loadingRooms"
+        :acceptedChatRooms="acceptedChatRooms"
+        :dms="dms"
+        :selectedRoom="selectedRoom"
+        :error="error"
+        :loadingMessages="loadingMessages"
+        :currentUser="currentUser"
+        @open-create-room="createRoomDialogOpen = true"
+        @open-create-dm="createDMDialogOpen = true"
+        @select-room="selectRoom"
+        @invite-room="handleClickInvite"
+        @settings-clicked="handleClickSettings"
+      />
+      <ChatMain
+        ref="chatMain"
+        v-if="selectedRoom"
+        :selectedRoom="selectedRoom"
+        :messages="messages"
+        :currentUser="currentUser"
+        :moreMessages="moreMessages"
+        :isFetchingMore="isFetchingMore"
+        :targetMessageId="targetMessageId"
+        @send-message="sendMessage"
+        @fetch-more-messages="fetchMoreMessages"
+        @found-message="foundMessage"
+      />
+      <div
+        v-else
+        class="flex-1 flex items-center justify-center text-sm text-gray-500"
+      >
+        <div class="flex flex-col items-center">
+          <CloudMoon class="mb-4 w-8 h-8"></CloudMoon>
+          Can you hear the crickets?
         </div>
       </div>
-    </BaseDialog>
 
-    <BaseDialog v-model="createDMDialogOpen" :closeOnEscape="true">
-      <template #header>
-        <div class="flex">Start a new DM</div>
-      </template>
+      <ChatParticipantsSidebar
+        v-if="selectedRoom && !selectedRoom.dm"
+        :selectedRoom="selectedRoom"
+        :currentUser="currentUser"
+        @select-temp-dm-room="selectTempDmRoom"
+      />
 
-      <div class="flex flex-col gap-4"></div>
-    </BaseDialog>
-
-    <BaseDialog
-      v-model="inviteFriendsDialogOpen"
-      :closeOnEscape="true"
-      :darkBackground="true"
-    >
-      <template #header>
-        <div class="flex flex-col">
-          <div class="text-lg font-semibold flex items-center">
-            <Hash class="mr-2 w-5 h-5" />
-            Add Friends
+      <BaseDialog v-model="createRoomDialogOpen" :closeOnEscape="true">
+        <template #header>
+          <div class="flex flex-col">
+            <div class="text-lg font-semibold flex items-center">
+              <Hash class="mr-2 w-5 h-5" />
+              Create New Channel
+            </div>
+            <div class="text-sm text-gray-400 pt-2">
+              Create a new channel to chat with friends/teammates.
+            </div>
           </div>
-          <div class="text-sm text-gray-400 pt-2">
-            Share this invite link to add your friends to this channel.
+        </template>
+
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-4 pl-2 pr-2">
+            <div class="flex flex-col">
+              <label class="pb-2">Channel Name*</label>
+              <input
+                v-model="newRoomName"
+                @keyup.enter="() => createRoom(newRoomName)"
+                class="flex-1 p-3 border border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
+              />
+            </div>
+            <button
+              class="bg-zinc-950 hover:bg-zinc-700 rounded py-2 px-4 text-white"
+              @click="() => createRoom(newRoomName)"
+            >
+              Create Channel
+            </button>
           </div>
         </div>
-      </template>
+      </BaseDialog>
 
-      <div class="flex flex-col gap-4">
-        <div class="flex flex-col gap-4 pl-2 pr-2">
+      <BaseDialog v-model="createDMDialogOpen" :closeOnEscape="true">
+        <template #header>
+          <div class="flex">Start a new DM</div>
+        </template>
+
+        <div class="flex flex-col gap-4"></div>
+      </BaseDialog>
+
+      <BaseDialog
+        v-model="inviteFriendsDialogOpen"
+        :closeOnEscape="true"
+        :darkBackground="true"
+      >
+        <template #header>
           <div class="flex flex-col">
-            <label>Invite Link:</label>
-            <div class="flex items-center">
-              <input
-                readonly
-                :placeholder="inviteLink"
-                class="flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
-              />
-              <Copy
-                @click="handleClickCopy"
-                class="ml-2 pl-2 w-8 h-8 text-zinc-500 cursor-pointer hover:text-zinc-950 hover:bg-gray-200 rounded-lg p-1"
-              />
+            <div class="text-lg font-semibold flex items-center">
+              <Hash class="mr-2 w-5 h-5" />
+              Add Friends
+            </div>
+            <div class="text-sm text-gray-400 pt-2">
+              Share this invite link to add your friends to this channel.
+            </div>
+          </div>
+        </template>
+
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-4 pl-2 pr-2">
+            <div class="flex flex-col">
+              <label>Invite Link:</label>
+              <div class="flex items-center">
+                <input
+                  readonly
+                  :placeholder="inviteLink"
+                  class="flex-1 p-3 border text-zinc-950 border-zinc-950 rounded-lg focus:outline-none focus:ring-1 focus:ring-zinc-950"
+                />
+                <Copy
+                  @click="handleClickCopy"
+                  class="ml-2 pl-2 w-8 h-8 text-zinc-500 cursor-pointer hover:text-zinc-950 hover:bg-gray-200 rounded-lg p-1"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </BaseDialog>
+      </BaseDialog>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onBeforeMount, nextTick } from "vue";
 import { getCurrentUserObj } from "@/utils/auth";
 import {
   getChatRooms,
@@ -133,6 +141,7 @@ import {
 import ChatSidebar from "./ChatSidebar.vue";
 import ChatParticipantsSidebar from "./ChatParticipantsSidebar.vue";
 import ChatMain from "./ChatMain.vue";
+import ChatHeader from "./ChatHeader.vue";
 import BaseDialog from "./Dialog.vue";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
@@ -169,6 +178,8 @@ const newRoomName = ref("");
 const inviteFriendsDialogOpen = ref(false);
 
 const inviteLink = ref("");
+
+const targetMessageId = ref("");
 
 function handleClickCopy() {
   navigator.clipboard.writeText(inviteLink.value);
@@ -256,13 +267,23 @@ async function fetchMessages() {
   }
 }
 
-async function selectRoom(room, targetUser = null) {
+function foundMessage() {
+  targetMessageId.value = "";
+}
+
+async function selectRoom(room, targetUser = null, targetMessage = null) {
+  if (targetMessage) targetMessageId.value = targetMessage.messageId;
   if (room.id === selectedRoom.value?.id) return;
+
   router.push(`/chat/${room.id}`);
   selectedRoom.value = room;
   messages.value = [];
   moreMessages.value = true;
-  if (!targetUser) fetchMessages();
+
+  if (!targetUser) {
+    await fetchMessages();
+  }
+
   await initWSConnection(targetUser);
 }
 
@@ -322,7 +343,7 @@ async function createRoom(name) {
   }
 }
 
-onMounted(async () => {
+onBeforeMount(async () => {
   currentUser.value = await getCurrentUserObj();
   await fetchChatRooms();
 });

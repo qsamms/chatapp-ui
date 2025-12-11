@@ -86,3 +86,8 @@ export async function getPendingRequests() {
 export async function removeFriend(id) {
   return await api.delete(`/friendships/${id}/`);
 }
+
+export async function searchText(text) {
+  const response = await api.post("/search/", { text });
+  return response;
+}

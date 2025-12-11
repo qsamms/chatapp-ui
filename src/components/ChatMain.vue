@@ -197,6 +197,7 @@ const props = defineProps({
   moreMessages: Boolean,
   isFetchingMore: Boolean,
   loadingMessages: Boolean,
+  targetMessageId: String,
 });
 
 const messagesContainer = ref(null);
@@ -327,6 +328,17 @@ watch(
     }
   }
 );
+
+watch(
+  () => props.targetMessageId,
+  async () => {
+    if (props.targetMessageId) {
+      scrollToMessage(props.targetMessageId);
+      emit("found-message");
+    }
+  }
+);
+
 watch(
   () => props.selectedRoom,
   async (oldRoom, newRoom) => {
@@ -393,7 +405,11 @@ function formatTimestamp(timestamp, formal = false) {
   }
 }
 
-const emit = defineEmits(["send-message", "fetch-more-messages"]);
+const emit = defineEmits([
+  "send-message",
+  "fetch-more-messages",
+  "found-message",
+]);
 
 async function sendMessage(message) {
   emit("send-message", message);

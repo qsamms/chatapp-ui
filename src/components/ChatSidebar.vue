@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex h-screen"
+    class="flex"
     @mouseenter="() => setIsHovering(true)"
     @mouseleave="() => setIsHovering(false)"
   >
@@ -10,15 +10,6 @@
         isCollapsed ? 'w-10' : 'w-80',
       ]"
     >
-      <button
-        v-if="isHovering"
-        @click="isCollapsed = !isCollapsed"
-        class="absolute top-4 right-0 translate-x-1/2 z-10 bg-zinc-200 hover:bg-zinc-300 text-zinc-800 rounded-full p-1 shadow"
-      >
-        <ChevronLeft v-if="!isCollapsed" class="w-4 h-4" />
-        <ChevronRight v-else class="w-4 h-4" />
-      </button>
-
       <div
         v-if="!isCollapsed"
         class="text-sm w-full text-zinc-950 border-zinc-300 border-b-2 pl-4 pb-4 pt-4 pr-2"
@@ -75,7 +66,7 @@
                   :class="[
                     'p-2 flex justify-between items-center cursor-pointer max-h-10 rounded-lg',
                     selectedRoom?.id === room.id
-                      ? 'bg-zinc-950 text-white'
+                      ? 'bg-zinc-400 text-black'
                       : 'hover:bg-zinc-200 text-zinc-600',
                   ]"
                 >
