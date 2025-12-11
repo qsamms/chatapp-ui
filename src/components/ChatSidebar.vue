@@ -238,15 +238,16 @@
             <div class="flex gap-2 items-center">
               <button
                 @click="onClickDelete(friend.id)"
-                class="flex items-center rounded-lg bg-zinc-950 text-white p-2 text-white"
+                class="flex items-center rounded-lg bg-zinc-950 text-white p-2 text-white text-sm"
               >
-                <X class="w-4 h-4" />Remove Friend
+                <X class="w-4 h-4" />
+                <div class="pl-1">Remove Friend</div>
               </button>
             </div>
           </div>
         </div>
       </div>
-      <div v-else class="text-zinc-500 p-2">You have no friends.</div>
+      <div v-else class="text-zinc-500 p-2">You have no friends</div>
     </div>
 
     <div v-else>
@@ -303,7 +304,7 @@
           </div>
         </div>
       </div>
-      <div v-else class="text-zinc-500 p-2">No pending requests.</div>
+      <div v-else class="text-zinc-500 p-2">No one wants to be your friend</div>
     </div>
   </BaseDialog>
 

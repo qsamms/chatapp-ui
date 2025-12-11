@@ -37,7 +37,7 @@
       >
         <div class="flex flex-col items-center">
           <CloudMoon class="mb-4 w-8 h-8"></CloudMoon>
-          Can you hear the crickets?
+          zzz
         </div>
       </div>
 

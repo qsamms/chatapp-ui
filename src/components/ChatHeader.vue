@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex h-16 bg-gray-100 border-b border-zinc-300 relative"
+    class="flex h-16 dark:bg-gray-100 border-b dark:border-zinc-300 relative"
     ref="wrapper"
   >
     <div id="spacer-left" class="w-80"></div>
@@ -71,6 +71,18 @@
             </div>
           </li>
         </ul>
+
+        <ul
+          v-if="noresults"
+          class="absolute z-10 w-full mt-1 max-h-60 overflow-auto bg-white border border-zinc-300 rounded-sm shadow-lg"
+        >
+          <li
+            :key="notfound"
+            class="pl-2 py-2 truncate hover:border rounded-md flex flex-col border-t border-zinc-300 cursor-pointer text-zinc-950"
+          >
+            <div class="flex items-center mb-1">No results</div>
+          </li>
+        </ul>
       </div>
     </div>
 
@@ -92,15 +104,18 @@ const emit = defineEmits(["select-room"]);
 const text = ref("");
 const hits = ref([]);
 const wrapper = ref(null);
+const noresults = ref(false);
 
 async function search() {
   const response = await searchText(text.value);
   hits.value = response.data.hits || [];
+  if (hits.value.length === 0) noresults.value = true;
 }
 
 function handleClickOutside(event) {
   if (wrapper.value && !wrapper.value.contains(event.target)) {
     hits.value = [];
+    noresults.value = false;
     text.value = "";
   }
 }

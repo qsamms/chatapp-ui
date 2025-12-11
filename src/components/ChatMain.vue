@@ -11,7 +11,7 @@
     >
       <div v-if="!selectedRoom.dm" class="flex flex-col items-center">
         <MessagesSquare class="mb-4 w-8 h-8"></MessagesSquare>
-        Nothing yet, break the ice?
+        Break the ice?
       </div>
       <div v-else class="flex flex-col items-center">
         <MessagesSquare class="mb-4 w-8 h-8"></MessagesSquare>
